@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sing in</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='src/main.css')}}">
+    <style>
+        body {
+            background-color: #1B1E2F;
+        }
+    </style>
+</head>
+
+<body>
+    
+    <div class="flex min-h-full flex-col justify-center px-16 py-24 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-sm ">
+          <img class="mx-auto h-20 w-auto" src="{{ url_for('static', filename='images/logo.svg') }}" alt="Your Company">
+          <h2 class="mt-6 text-center text-2xl leading-9 tracking-tight text-white font-poppins font-semibold ">Crear cuenta</h2>
+        </div>
+        <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+          <form class="space-y-4" action="#" method="POST">
+            <div>
+              <label for="fullname" class="block text-sm font-medium leading-6 text-white font-hind font-semibold">Nombre completo  <span class="text-red-600">*</span></label>
+              <div class="mt-2">
+                <div class="relative">
+                  <input id="fullname" name="fullname" type="text" autocomplete="name" required class="block w-full rounded-3xl border-0 py-3 bg-dark-2 text-white shadow-sm ring-1 ring-inset ring-white ring-opacity-50 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-rojo-medio sm:text-sm border border-white border-opacity-95 sm:text-sm sm:leading-6 pl-12">
+                  <span class="absolute left-3 top-1/2 transform -translate-y-1/2">
+                    <svg width="25px" height="25px" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path fill-rule="evenodd" clip-rule="evenodd" d="M10.5 3.49804C10.5 5.15396 9.157 6.49609 7.5 6.49609C5.843 6.49609 4.5 5.15396 4.5 3.49804C4.5 1.84212 5.843 0.5 7.5 0.5C9.157 0.5 10.5 1.84212 10.5 3.49804Z" stroke="#B51F1F" stroke-linecap="square"/>
+                      <path fill-rule="evenodd" clip-rule="evenodd" d="M12.5 14.4909H2.5C2.5 13.7808 2.5 13.1053 2.5 12.4936C2.5 10.8368 3.84315 9.49414 5.5 9.49414H9.5C11.1569 9.49414 12.5 10.8368 12.5 12.4936C12.5 13.1053 12.5 13.7808 12.5 14.4909Z" stroke="#B51F1F" stroke-linecap="square"/>
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <label for="email" class="block text-sm font-medium leading-6 text-white font-hind font-semibold">Correo electrónico  <span class="text-red-600">*</span></label>
+              <div class="mt-2">
+                <div class="relative">
+                  <input id="email" name="email" type="email" autocomplete="email" required class="block w-full rounded-3xl border-0 py-3 bg-dark-2 text-white shadow-sm ring-1 ring-inset ring-white ring-opacity-50 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-rojo-medio sm:text-sm border border-white border-opacity-95 sm:text-sm sm:leading-6 pl-12">
+                  <span class="absolute left-3 top-1/2 transform -translate-y-1/2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6 text-rojo-medio">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <label for="password" class="block text-sm font-medium leading-6 text-white font-hind font-semibold">Contraseña  <span class="text-red-600">*</span></label>
+              <div class="mt-2">
+                  <div class="relative">
+                      <input id="password" name="password" type="password" required class="block w-full rounded-3xl border-0 py-3 bg-dark-2 text-white shadow-sm ring-1 ring-inset ring-white ring-opacity-50 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-rojo-medio sm:text-sm border border-white border-opacity-95 sm:text-sm sm:leading-6 pl-12">
+                      <button id="togglePassword" type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          <svg id="eyeOffIcon" fill="#E0C9C9" width="25px" height="25px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M2.293,21.707a1,1,0,0,0,1.414,0l3.2-3.2A9.581,9.581,0,0,0,12,20c4.325,0,8.227-3,9.938-7.654a.993.993,0,0,0,0-.692A12.6,12.6,0,0,0,18.7,6.719l3.012-3.012a1,1,0,1,0-1.414-1.414l-3.2,3.2A9.581,9.581,0,0,0,12,4C7.675,4,3.773,7,2.062,11.654a.993.993,0,0,0,0,.692,12.6,12.6,0,0,0,3.243,4.935L2.293,20.293A1,1,0,0,0,2.293,21.707ZM17.266,8.148A10.454,10.454,0,0,1,19.929,12c-1.478,3.657-4.556,6-7.929,6a7.52,7.52,0,0,1-3.632-.954l1.613-1.613A3.947,3.947,0,0,0,12,16a4,4,0,0,0,4-4,3.947,3.947,0,0,0-.567-2.019Zm-7.191,4.363A1.96,1.96,0,0,1,10,12a2,2,0,0,1,2-2,1.96,1.96,0,0,1,.511.075Zm3.85-1.022A1.96,1.96,0,0,1,14,12a2,2,0,0,1-2,2,1.96,1.96,0,0,1-.511-.075ZM4.071,12C5.549,8.343,8.627,6,12,6a7.52,7.52,0,0,1,3.632.954L14.019,8.567A3.947,3.947,0,0,0,12,8a4,4,0,0,0-4,4,3.947,3.947,0,0,0,.567,2.019L6.734,15.852A10.454,10.454,0,0,1,4.071,12Z"/></svg>                          
+                          <svg class="hidden" id="eyeIcon" fill="#E0C9C9" width="25px" height="25px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21.92,11.6C19.9,6.91,16.1,4,12,4S4.1,6.91,2.08,11.6a1,1,0,0,0,0,.8C4.1,17.09,7.9,20,12,20s7.9-2.91,9.92-7.6A1,1,0,0,0,21.92,11.6ZM12,18c-3.17,0-6.17-2.29-7.9-6C5.83,8.29,8.83,6,12,6s6.17,2.29,7.9,6C18.17,15.71,15.17,18,12,18ZM12,8a4,4,0,1,0,4,4A4,4,0,0,0,12,8Zm0,6a2,2,0,1,1,2-2A2,2,0,0,1,12,14Z"/></svg>                      
+                      </button>
+                      <div class="absolute inset-y-0 left-0 flex items-center pl-3">
+                          <span class="absolute left-3 top-1/2 transform -translate-y-1/2">
+                            <svg fill="#B51F1F" width="25px" height="25px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17,9V7A5,5,0,0,0,7,7V9a3,3,0,0,0-3,3v7a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V12A3,3,0,0,0,17,9ZM9,7a3,3,0,0,1,6,0V9H9Zm9,12a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V12a1,1,0,0,1,1-1H17a1,1,0,0,1,1,1Z"/></svg>
+                          </span>             
+                      </div>
+                  </div>
+              </div>
+            </div>
+            <div>
+              <label for="password" class="block text-sm font-medium leading-6 text-white font-hind font-semibold">Confirmar ontraseña  <span class="text-red-600">*</span></label>
+              <div class="mt-2">
+                  <div class="relative">
+                      <input id="passwordcf" name="password" type="password" required class="block w-full rounded-3xl border-0 py-3 bg-dark-2 text-white shadow-sm ring-1 ring-inset ring-white ring-opacity-50 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-rojo-medio sm:text-sm border border-white border-opacity-95 sm:text-sm sm:leading-6 pl-12">
+                      <button id="togglePasswordcf" type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          <svg id="eyeOffIconcf" fill="#E0C9C9" width="25px" height="25px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M2.293,21.707a1,1,0,0,0,1.414,0l3.2-3.2A9.581,9.581,0,0,0,12,20c4.325,0,8.227-3,9.938-7.654a.993.993,0,0,0,0-.692A12.6,12.6,0,0,0,18.7,6.719l3.012-3.012a1,1,0,1,0-1.414-1.414l-3.2,3.2A9.581,9.581,0,0,0,12,4C7.675,4,3.773,7,2.062,11.654a.993.993,0,0,0,0,.692,12.6,12.6,0,0,0,3.243,4.935L2.293,20.293A1,1,0,0,0,2.293,21.707ZM17.266,8.148A10.454,10.454,0,0,1,19.929,12c-1.478,3.657-4.556,6-7.929,6a7.52,7.52,0,0,1-3.632-.954l1.613-1.613A3.947,3.947,0,0,0,12,16a4,4,0,0,0,4-4,3.947,3.947,0,0,0-.567-2.019Zm-7.191,4.363A1.96,1.96,0,0,1,10,12a2,2,0,0,1,2-2,1.96,1.96,0,0,1,.511.075Zm3.85-1.022A1.96,1.96,0,0,1,14,12a2,2,0,0,1-2,2,1.96,1.96,0,0,1-.511-.075ZM4.071,12C5.549,8.343,8.627,6,12,6a7.52,7.52,0,0,1,3.632.954L14.019,8.567A3.947,3.947,0,0,0,12,8a4,4,0,0,0-4,4,3.947,3.947,0,0,0,.567,2.019L6.734,15.852A10.454,10.454,0,0,1,4.071,12Z"/></svg>                          
+                          <svg class="hidden" id="eyeIconcf" fill="#E0C9C9" width="25px" height="25px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21.92,11.6C19.9,6.91,16.1,4,12,4S4.1,6.91,2.08,11.6a1,1,0,0,0,0,.8C4.1,17.09,7.9,20,12,20s7.9-2.91,9.92-7.6A1,1,0,0,0,21.92,11.6ZM12,18c-3.17,0-6.17-2.29-7.9-6C5.83,8.29,8.83,6,12,6s6.17,2.29,7.9,6C18.17,15.71,15.17,18,12,18ZM12,8a4,4,0,1,0,4,4A4,4,0,0,0,12,8Zm0,6a2,2,0,1,1,2-2A2,2,0,0,1,12,14Z"/></svg>                      
+                      </button>
+                      <div class="absolute inset-y-0 left-0 flex items-center pl-3">
+                          <span class="absolute left-3 top-1/2 transform -translate-y-1/2">
+                            <svg fill="#B51F1F" width="25px" height="25px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17,9V7A5,5,0,0,0,7,7V9a3,3,0,0,0-3,3v7a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V12A3,3,0,0,0,17,9ZM9,7a3,3,0,0,1,6,0V9H9Zm9,12a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V12a1,1,0,0,1,1-1H17a1,1,0,0,1,1,1Z"/></svg>
+                          </span>             
+                      </div>
+                  </div>
+              </div>
+            </div>
+      
+            <div class="py-4">
+              <button type="submit" class="flex w-full justify-center rounded-3xl bg-white px-3 py-3 text-sm font-semibold leading-6 text-rojo-medio shadow-sm hover:bg-light focus-visible:bg-light focus-visible:text-rojo-claro font-poppins font-medium">Registrarse</button>
+            </div>
+          </form>
+      
+          <p class="mt-4 text-center text-sm text-gray-500 font-hind font-regular">
+            ¿Ya tienes una cuenta?
+            <a href="/login" class="font-hind font-semibold leading-6 text-rojo-medio hover:text-rojo-claro">Inicia sesión</a>
+          </p>
+        </div>
+      </div>
+
+      <script src="{{url_for('static', filename='js/register.js')}}"></script>
+
+</body>
+</html>
