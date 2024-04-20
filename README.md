@@ -65,12 +65,7 @@ Para ejecutar el proyecto, sigue estos pasos:
 2. Activa el entorno virtual.
 3. Ejecuta el siguiente comando:
 
-`flask run --debug`
-
-O
-
-`cd app`
-`flask run --debug`
+`flask --app app/app.py run --debug`
 
 
 Esto iniciará el servidor web de Flask en modo de desarrollo.

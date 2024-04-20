@@ -1,3 +1,82 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    /* Poppins */
+    /* @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');*/
+
+    /* Poppins */
+    @font-face {
+        font-family: 'Poppins';
+        font-style: normal;
+        font-weight: 300;
+        font-display: swap;
+        src: url('../fonts/poppins/Poppins-Light.woff2') format('woff2');
+    }
+    @font-face {
+        font-family: 'Poppins';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('../fonts/poppins/Poppins-Regular.woff2') format('woff2');
+    }
+    @font-face {
+        font-family: 'Poppins';
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url('../fonts/poppins/Poppins-Medium.woff2') format('woff2');
+    }
+    @font-face {
+        font-family: 'Poppins';
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url('../fonts/poppins/Poppins-SemiBold.woff2') format('woff2');
+    }
+    @font-face {
+        font-family: 'Poppins';
+        font-style: normal;
+        font-weight: 700;
+        font-display: swap;
+        src: url('../fonts/poppins/Poppins-Bold.woff2') format('woff2');
+    }
+
+    /* hind */
+    @font-face {
+        font-family: 'Hind';
+        font-style: normal;
+        font-weight: 300;
+        font-display: swap;
+        src: url('../fonts/hind/Hind-Light.woff2') format('woff2');
+    }
+    @font-face {
+        font-family: 'Hind';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('../fonts/hind/Hind-Regular.woff2') format('woff2');
+    }
+    @font-face {
+        font-family: 'Hind';
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url('../fonts/hind/Hind-Medium.woff2') format('woff2');
+    }
+    @font-face {
+        font-family: 'Hind';
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url('../fonts/hind/Hind-SemiBold.woff2') format('woff2');
+    }
+    @font-face {
+        font-family: 'Hind';
+        font-style: normal;
+        font-weight: 700;
+        font-display: swap;
+        src: url('../fonts/hind/Hind-Bold.woff2') format('woff2');
+    }
+}
