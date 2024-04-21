@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RecomendIA</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='src/main.css')}}">
+    <style>
+        body {
+            background-color: #1B1E2F;
+        }
+    </style>
+</head>
+<body>
+  <div style="display: flex">
+    <h1 style="color: white; font-size: 24px; font-family: poppins; padding: 35px;">¡Hola {{ name }}!</h1>
+    <a href="{{ url_for('login') }}" style="color: red; float: right; font-size: 24px; font-family: poppins; padding: 35px; margin-left: 1400px;">Cerrar sesión</a>
+  </div>
+    <div class="flex min-h-full flex-col justify-center px-16 py-24 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-sm ">
+          <img class="mx-auto h-32 w-auto" src="{{ url_for('static', filename='images/logo.svg') }}" alt="Your Company">
+          <h1 class="mt-10 text-center text-2xl leading-9 tracking-tight text-white font-poppins font-semibold ">RecomendIA</h1>
+        </div>
+      </div>
+
+      <script src="{{url_for('static', filename='js/login.js')}}"></script>
+
+</body>
+</html>
