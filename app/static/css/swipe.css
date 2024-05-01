@@ -73,9 +73,7 @@
     width: 80vw;
     max-width: 400px;
     height: 65vh;
-    background: #2b375d;
-    /* padding-bottom: 40px; */
-    /* border-radius: 8px; */
+    background: #767e99;
     overflow: hidden;
     position: absolute;
     will-change: transform;
@@ -83,7 +81,7 @@
     cursor: -webkit-grab;
     cursor: -moz-grab;
     cursor: grab;
-  }
+    border-radius: 14px;}
   
   .moving.tinder--card {
     transition: none;
@@ -151,17 +149,63 @@
     color: black;
     display: inline-block; /* To allow for width/height */
   }
-  .custom-ignore {
+.custom-ignore {
     background: url('/app/static/images/ignore.svg') no-repeat;
     width: 50px;
     height: 50px;
     color: black;
     display: inline-block; /* To allow for width/height */
-  }
-  .custom-dislike {
+}
+.custom-dislike {
     background: url('/app/static/images/dislike.svg') no-repeat;
     width: 50px;
     height: 50px;
     color: black;
     display: inline-block; /* To allow for width/height */
-  }
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 40px; /* Añade espacio a la izquierda y a la derecha */
+    background-color: #1B1E2F;
+}
+
+.navbar__item {
+    display: flex;
+    align-items: center;
+}
+
+.navbar__item--left {
+    justify-content: flex-start;
+}
+
+.navbar__item--center {
+    justify-content: center;
+}
+
+.navbar__item--right {
+    justify-content: flex-end;
+}
+
+.navbar__logo {
+    width: 50px;
+    height: 50px;
+}
+
+.navbar__button {
+    padding: 10px 20px;
+}
+
+.navbar__icon {
+    font-size: 24px;
+}
+
+.logo {
+    width: 40px; /* Cambia este valor a lo que necesites */
+    height: auto; /* Esto mantendrá las proporciones de la imagen */
+}
+
+.navbar__icon {
+  color: #FFFFFF; /* Cambia este valor al color que desees */
+}

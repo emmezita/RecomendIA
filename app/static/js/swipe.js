@@ -103,10 +103,11 @@ allCards.forEach(function (el) {
 
 });
 
-function createButtonListener(love) {
+function createButtonListener(action) {
   return function (event) {
     var cards = document.querySelectorAll('.tinder--card:not(.removed)');
     var moveOutWidth = document.body.clientWidth * 1.5;
+    var moveOutHeight = document.body.clientHeight * 1.5;
 
     if (!cards.length) return false;
 
@@ -114,10 +115,12 @@ function createButtonListener(love) {
 
     card.classList.add('removed');
 
-    if (love) {
+    if (action === 'love') {
       card.style.transform = 'translate(' + moveOutWidth + 'px, -100px) rotate(-30deg)';
-    } else {
+    } else if (action === 'nolove') {
       card.style.transform = 'translate(-' + moveOutWidth + 'px, -100px) rotate(30deg)';
+    } else if (action === 'ignore') {
+      card.style.transform = 'translate(0, -' + moveOutHeight + 'px)';
     }
 
     initCards();
@@ -126,8 +129,10 @@ function createButtonListener(love) {
   };
 }
 
-var noloveListener = createButtonListener(false);
-var loveListener = createButtonListener(true);
+var noloveListener = createButtonListener('nolove');
+var loveListener = createButtonListener('love');
+var ignoreListener = createButtonListener('ignore'); // Nuevo listener
 
 nolove.addEventListener('click', noloveListener);
 love.addEventListener('click', loveListener);
+ignore.addEventListener('click', ignoreListener); // Agregar el listener al botón ignore
