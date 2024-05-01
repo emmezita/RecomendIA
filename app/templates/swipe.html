@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Swipe</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='src/main.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/swipe.css')}}">
+    <script src="https://kit.fontawesome.com/0109ddc3c5.js" crossorigin="anonymous"></script>
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"> -->
+    <script src="https://hammerjs.github.io/dist/hammer.min.js"></script>
+
+</head>
+<body>
+    <div class="navbar">
+      <div class="navbar__item navbar__item--left">
+      <img class="logo" src="{{ url_for('static', filename='images/logo.svg') }}" alt="Your Company">        </div>
+      <div class="navbar__item navbar__item--center">
+        <button class="sugiereme-button">
+          <div class="circular-icon">
+            <i class="fa fa-magnifying-glass" ></i>
+          </div>
+          <p>
+            Sugiereme
+          </p>
+          <div class="circular-icon" style="visibility: hidden; margin-left: 0px;">
+            <i class="fa fa-magnifying-glass" ></i>
+          </div>
+        </button>
+      </div>
+      <div class="navbar__item navbar__item--right">
+        <i class="fa fa-bars navbar__icon"></i>
+      </div>
+    </div>
+
+      <!-- El resto de tu código -->
+    
+    <div class="tinder">
+        <div class="tinder--status">
+          <i class="fa fa-heart-crack"></i>
+          <i class="fa fa-heart"></i>
+          <i class="fa fa-remove"></i>
+        </div>
+      
+        <div class="tinder--cards">
+          <div class="tinder--card">
+            <h3>Demo card 1</h3>
+            <p>This is a demo for Tinder like swipe cards</p>
+          </div>
+          <div class="tinder--card">
+            <h3>Demo card 2</h3>
+            <p>This is a demo for Tinder like swipe cards</p>
+          </div>
+          <div class="tinder--card">
+            <h3>Demo card 3</h3>
+            <p>This is a demo for Tinder like swipe cards</p>
+          </div>
+          <div class="tinder--card">
+            <h3>Demo card 4</h3>
+            <p>This is a demo for Tinder like swipe cards</p>
+          </div>
+          <div class="tinder--card">
+            <h3>Demo card 5</h3>
+            <p>This is a demo for Tinder like swipe cards</p>
+          </div>
+        </div>
+      
+        <div class="tinder--buttons">
+          <button id="nolove"><i class="fa fa-heart-crack"></i></button>
+          <button id="ignore"><i class="fa fa-remove"></i></button>
+          <button id="love"><i class="fa fa-heart"></i></button>
+          <!-- <button id="nolove"><i class="custom-dislike"></i></button>
+          <button id="nope"><i class="custom-ignore"></i></button>
+          <button id="love"><i class="custom-like"></i></button> -->
+        </div>
+    </div>
+
+    <script src="{{url_for('static', filename='js/swipe.js')}}"></script>
+
+</body>
+</html>

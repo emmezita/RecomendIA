@@ -9,7 +9,7 @@ app.secret_key = os.urandom(24)
 conn = psycopg2.connect(
     dbname="bd_recomend",
     user="postgres",
-    password="123456",
+    password="1234",
     host="localhost"
 )
 
@@ -69,9 +69,13 @@ def register():
 
     return render_template('register.html')
 
-@app.route('/home/<name>')
+@app.route('/home')
 def home(name=None):
     return render_template('home.html', name=name)
+
+@app.route('/swipe')
+def swipe():
+    return render_template('swipe.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
