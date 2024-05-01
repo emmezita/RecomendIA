@@ -212,3 +212,29 @@
 .navbar__icon {
   color: #FFFFFF; /* Cambia este valor al color que desees */
 }
+
+.sugiereme-button {
+  background-color: transparent;
+  border-radius: 50px;
+  border: 2px solid #FFFFFF;
+  color: white;
+  width: 40vw;
+  height: 40px;
+  min-width: 160px;
+  max-width: 250px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sugiereme-button .circular-icon {
+  margin-left: 3px;
+  background-color: #FFFFFF;
+  color: #1B1E2F;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

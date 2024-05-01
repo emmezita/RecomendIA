@@ -17,7 +17,17 @@
       <div class="navbar__item navbar__item--left">
       <img class="logo" src="{{ url_for('static', filename='images/logo.svg') }}" alt="Your Company">        </div>
       <div class="navbar__item navbar__item--center">
-        <button class="navbar__button">Botón</button>
+        <button class="sugiereme-button">
+          <div class="circular-icon">
+            <i class="fa fa-magnifying-glass" ></i>
+          </div>
+          <p>
+            Sugiereme
+          </p>
+          <div class="circular-icon" style="visibility: hidden; margin-left: 0px;">
+            <i class="fa fa-magnifying-glass" ></i>
+          </div>
+        </button>
       </div>
       <div class="navbar__item navbar__item--right">
         <i class="fa fa-bars navbar__icon"></i>
