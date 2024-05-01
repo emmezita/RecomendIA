@@ -10,7 +10,7 @@
   
   .tinder {
     width: 100vw;
-    height: 100vh;
+    height: 90dvh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -81,7 +81,10 @@
     cursor: -webkit-grab;
     cursor: -moz-grab;
     cursor: grab;
-    border-radius: 14px;}
+    border-radius: 14px;
+    border-right: 30px solid #B51F1F; /* Añade una franja vertical de 10px de grosor, de color rojo */
+    border-bottom: 30px solid #FFFFFF; /* Añade una franja vertical de 10px de grosor, de color rojo */
+  }
   
   .moving.tinder--card {
     transition: none;
