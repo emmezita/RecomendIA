@@ -9,7 +9,7 @@ app.secret_key = os.urandom(24)
 conn = psycopg2.connect(
     dbname="bd_recomend",
     user="postgres",
-    password="1234",
+    password="123456",
     host="localhost"
 )
 
@@ -33,8 +33,7 @@ def login():
 
         if result:
             if result[1] == password:
-                session['email'] = email
-                name = result[2] 
+                name = result[2]
                 return redirect(url_for('home', name=name))
             else:
                 return jsonify({'error': 'Clave inválida.'}), 400
@@ -69,7 +68,8 @@ def register():
 
     return render_template('register.html')
 
-@app.route('/home')
+
+@app.route('/home/<name>')
 def home(name=None):
     return render_template('home.html', name=name)
 

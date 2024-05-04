@@ -4,26 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RecomendIA</title>
-    <link rel="stylesheet" href="{{url_for('static', filename='src/main.css')}}">
-    <style>
-        body {
-            background-color: #1B1E2F;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='src/main.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}"> 
 </head>
 <body>
-  <div style="display: flex">
-    <h1 style="color: white; font-size: 24px; font-family: poppins; padding: 35px;">¡Hola {{ name }}!</h1>
-    <a href="{{ url_for('login') }}" style="color: red; float: right; font-size: 24px; font-family: poppins; padding: 35px; margin-left: 1400px;">Cerrar sesión</a>
-  </div>
+    <div style="display: flex">
+        <h1 style="color: white; font-size: 24px; font-family: poppins; padding: 35px;">¡Hola {{ name }}!</h1>
+        <a href="{{ url_for('login') }}" style="color: red; float: right; font-size: 24px; font-family: poppins; padding: 35px; margin-left: 1400px;">Cerrar sesión</a>
+    </div>
     <div class="flex min-h-full flex-col justify-center px-16 py-24 lg:px-8">
         <div class="sm:mx-auto sm:w-full sm:max-w-sm ">
-          <img class="mx-auto h-32 w-auto" src="{{ url_for('static', filename='images/logo.svg') }}" alt="Your Company">
-          <h1 class="mt-10 text-center text-2xl leading-9 tracking-tight text-white font-poppins font-semibold ">RecomendIA</h1>
+            <img class="mx-auto h-32 w-auto logo-img" src="{{ url_for('static', filename='images/logo.svg') }}" alt="Your Company">
+            <h1 class="mt-10 text-center text-2xl leading-9 tracking-tight text-white font-poppins font-semibold title">Vamos a conocerte</h1>
+            <form>
+              <div class="slc-container">
+                <div class="select-container">
+                    <label for="generos" class="text-white">Géneros</label>
+                    <select id="generos" name="generos" multiple>
+                        <option value="accion">Acción</option>
+                        <option value="comedia">Comedia</option>
+                        <option value="drama">Drama</option>
+                    </select>
+                </div>
+                <div class="select-container">
+                    <label for="directores" class="text-white">Directores</label>
+                    <select id="directores" name="directores" multiple>
+                        <option value="spielberg">Steven Spielberg</option>
+                        <option value="tarantino">Quentin Tarantino</option>
+                        <option value="nolan">Christopher Nolan</option>
+                    </select>
+                </div>
+                <div class="select-container">
+                    <label for="epocas" class="text-white">Épocas favoritas</label>
+                    <select id="epocas" name="epocas" multiple>
+                        <option value="contemporanea">Contemporánea</option>
+                        <option value="clasica">Clásica</option>
+                        <option value="futurista">Futurista</option>
+                    </select>
+                </div>
+              </div>
+                <div class="form-container">
+                    <input type="submit" value="Guardar intereses">
+                </div>
+            </form>
         </div>
-      </div>
-
-      <script src="{{url_for('static', filename='js/login.js')}}"></script>
-
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
 </body>
 </html>
