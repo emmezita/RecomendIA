@@ -13,13 +13,21 @@ body {
     font-size: 20px;
 }
 
+
 .select-container select {
     width: 100%;
     padding: 50px;
     font-size: 20px;
-    border-radius: 30px; /* Ajusta el radio de borde aquí */
-    background-color: #fff;
+    border-radius: 30px;
+    background-color: #1B1E2F;
+    border-color: #fff;
     cursor: pointer;
+}
+
+.select2-container--default .select2-selection--multiple {
+    background-color:  #1B1E2F;
+    border-radius: 25px;
+    padding: 3%;
 }
 
 .title {

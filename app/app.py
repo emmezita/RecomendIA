@@ -7,10 +7,10 @@ app.secret_key = os.urandom(24)
 
 # Conexión con la bd
 conn = psycopg2.connect(
-    dbname="bd_recomend",
-    user="postgres",
+    dbname="knoguera",
+    user="knoguera",
     password="123456",
-    host="localhost"
+    host="labs-dbservices01.ucab.edu.ve"
 )
 
 @app.route("/")
@@ -28,12 +28,15 @@ def login():
         password = request.form['password']
 
         cur = conn.cursor()
-        cur.execute("SELECT * FROM public.\"Usuario\" WHERE usuario_id = %s", (email,))
+        cur.execute("SELECT * FROM public.\"usuario\" WHERE usuario_email = %s", (email,))
         result = cur.fetchone()
 
         if result:
-            if result[1] == password:
-                name = result[2]
+            if result[3] == password:
+                name = result[1]
+                name = result[1]
+                usuario_id = result[0]
+                session['usuario_id'] = usuario_id  # Guardar el ID del usuario en la sesión
                 return redirect(url_for('home', name=name))
             else:
                 return jsonify({'error': 'Clave inválida.'}), 400
@@ -55,23 +58,50 @@ def register():
             return jsonify({'error': 'Las contraseñas no coinciden.'}), 400
 
         cur = conn.cursor()
-        cur.execute("SELECT COUNT(*) FROM public.\"Usuario\" WHERE usuario_id = %s", (email,))
+        cur.execute("SELECT COUNT(*) FROM public.\"usuario\" WHERE usuario_email = %s", (email,))
         result = cur.fetchone()[0]
 
         if result > 0:
             return jsonify({'error': 'El correo electrónico ya está registrado.'}), 400
         else:
-            cur.execute("INSERT INTO public.\"Usuario\" (usuario_id, usuario_password, usuario_name) VALUES (%s, %s, %s)", (email, password, fullname))
+            cur.execute("INSERT INTO public.\"usuario\" (usuario_nombre, usuario_email, usuario_password) VALUES (%s, %s, %s)", (fullname, email, password))
             conn.commit()
             cur.close()
             return jsonify({'success': 'Usuario registrado correctamente.'}), 200
 
     return render_template('register.html')
 
-
-@app.route('/home/<name>')
+@app.route('/home/<name>', methods=['GET', 'POST'])
 def home(name=None):
+    
+    usuario_id = session.get('usuario_id')
+    if usuario_id is None:
+        return "Error: No se pudo obtener el ID del usuario"
+        
+    if request.method == 'POST':
+        generos = request.form.getlist('generos')
+        epocas = request.form.getlist('epocas')
+
+        try:
+            cur = conn.cursor()
+
+            for genero in generos:
+                for epoca in epocas:
+                    ano_inicio, ano_fin = epoca.split('-')
+                    cur.execute("INSERT INTO PreferenciasUsuario (usuario_id, genero, ano_inicio, ano_fin) VALUES (%s, %s, %s, %s)", (usuario_id, genero, ano_inicio, ano_fin))
+
+            conn.commit()
+            
+            cur.close()
+            conn.close()
+
+            return "Preferencias guardadas correctamente"
+        except psycopg2.Error as e:
+            conn.rollback()
+            return f"Error al guardar las preferencias: {e}"
+
     return render_template('home.html', name=name)
+
 
 @app.route('/swipe')
 def swipe():
