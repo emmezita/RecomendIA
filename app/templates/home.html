@@ -13,39 +13,49 @@
         <h1 style="color: white; font-size: 24px; font-family: poppins; padding: 35px;">¡Hola {{ name }}!</h1>
         <a href="{{ url_for('login') }}" style="color: red; float: right; font-size: 24px; font-family: poppins; padding: 35px; margin-left: 1400px;">Cerrar sesión</a>
     </div>
+
     <div class="flex min-h-full flex-col justify-center px-16 py-24 lg:px-8">
         <div class="sm:mx-auto sm:w-full sm:max-w-sm ">
             <img class="mx-auto h-32 w-auto logo-img" src="{{ url_for('static', filename='images/logo.svg') }}" alt="Your Company">
             <h1 class="mt-10 text-center text-2xl leading-9 tracking-tight text-white font-poppins font-semibold title">Vamos a conocerte</h1>
-            <form>
-              <div class="slc-container">
+            <form action="{{ url_for('home', name=name) }}" method="post">
                 <div class="select-container">
                     <label for="generos" class="text-white">Géneros</label>
-                    <select id="generos" name="generos" multiple>
-                        <option value="accion">Acción</option>
-                        <option value="comedia">Comedia</option>
-                        <option value="drama">Drama</option>
+                    <select id="generos" name="generos" multiple style="padding: 3% !important; border-radius: 25px">
+                        <option value="Action">Acción</option>
+                        <option value="Adventure">Aventura</option>
+                        <option value="Animation">Animación</option>
+                        <option value="Comedy">Comedia</option>
+                        <option value="Crime">Crimen</option>
+                        <option value="Documentary">Documental</option>
+                        <option value="Drama">Drama</option>
+                        <option value="Family">Familiar</option>
+                        <option value="Fantasy">Fantasía</option>
+                        <option value="History">Historia</option>
+                        <option value="Horror">Terror</option>
+                        <option value="Music">Música</option>
+                        <option value="Mystery">Misterio</option>
+                        <option value="Romance">Romance</option>
+                        <option value="Science Fiction">Ciencia Ficción</option>
+                        <option value="TV Movie">Película de TV</option>
+                        <option value="Thriller">Suspenso</option>
+                        <option value="War">Guerra</option>
+                        <option value="Western">Western</option>
                     </select>
                 </div>
                 <div class="select-container">
-                    <label for="directores" class="text-white">Directores</label>
-                    <select id="directores" name="directores" multiple>
-                        <option value="spielberg">Steven Spielberg</option>
-                        <option value="tarantino">Quentin Tarantino</option>
-                        <option value="nolan">Christopher Nolan</option>
+                    <label for="epocas" class="text-white">Años de preferencia</label>
+                    <select id="epocas" name="epocas" multiple style="padding: 3% !important; border-radius: 25px">
+                        <option value="1900-1910">1900-1910</option>
+                        <option value="1911-1920">1911-1920</option>
+                        <option value="1921-1930">1921-1930</option>
+                        <option value="1931-1940">1931-1940</option>
+                        <option value="1941-1950">1941-1950</option>
+
                     </select>
                 </div>
-                <div class="select-container">
-                    <label for="epocas" class="text-white">Épocas favoritas</label>
-                    <select id="epocas" name="epocas" multiple>
-                        <option value="contemporanea">Contemporánea</option>
-                        <option value="clasica">Clásica</option>
-                        <option value="futurista">Futurista</option>
-                    </select>
-                </div>
-              </div>
                 <div class="form-container">
-                    <input type="submit" value="Guardar intereses">
+                    <input type="submit" value="Guardar preferencias">
                 </div>
             </form>
         </div>
