@@ -153,34 +153,28 @@ def home():
 import requests
 
 def obtener_recomendaciones(genre_ids, year_ranges, n=10):
-    # Filtrar DataFrame por géneros y rango de años
-
-    print (df)
-    print (genre_ids)
-    print (year_ranges)
-
-    filtered_df = df[df['genre_id'].apply(lambda x: any(genre in x.split(',') for genre in map(str, genre_ids))) &  df['age_release'].apply(lambda x: any(str(min_year) <= str(x) <= str(max_year) for min_year, max_year in year_ranges)) ]                
-        
-    # Generar texto de entrada para TF-IDF basado en múltiples géneros y rangos de años
-    genres_text = ' '.join([f"genre_{genre_id}" for genre_id in genre_ids])
-    years_text = ' '.join([f"{year[0]}-{year[1]}" for year in year_ranges])
+    # Convertir genre_ids y year_ranges a strings y ajustar el formato para coincidir con el entrenamiento
+    genres_text = ','.join(map(str, genre_ids))  # Los géneros simplemente se unen por comas, sin el prefijo "genre_"
+    years_text = ' '.join([f"{str(year[0])[:3]}0s" for year in year_ranges])  # Convertir cada rango de años en su década correspondiente
+    
+    # El input_text debe reflejar cómo se ve el combined_text en tu dataset
     input_text = f"{genres_text} {years_text}"
     input_tfidf = tfidf_vectorizer.transform([input_text])
-
+    
     # Calcular similitud coseno
     similarities = cosine_similarity(input_tfidf, tfidf_matrix)
-
+    
     # Obtener índices de las películas más similares
-    similar_indices = similarities.argsort(axis=1)[:, -n-1:-1][0]
-
-    # Construir la lista de recomendaciones
+    similar_indices = similarities.argsort(axis=1)[:, -n:][0]
+    
+    # Construir la lista de recomendaciones basada en los índices obtenidos
     recommended_movies = []
     for idx in similar_indices:
-        if idx < len(filtered_df):  # Asegurar que el índice esté dentro del rango del DataFrame filtrado
-            movie = filtered_df.iloc[idx]
+        if idx < len(df):  # Asegurar que el índice esté dentro del rango del DataFrame original
+            movie = df.iloc[idx]
             recommended_movies.append({'title': movie['title'], 'genre_id': movie['genre_id'], 'age_release': movie['age_release'], 'image_url': movie['image_url']})
-
-    return recommended_movies[:n]  # Asegurar devolver hasta n recomendaciones
+    
+    return recommended_movies[:n]  # Devolver hasta n recomendaciones
 
 
 @app.route('/swipe', methods=['GET', 'POST'])
@@ -203,7 +197,8 @@ def swipe():
             epocas = []
             for preferencias in preferencias:
                 genero, ano_inicio, ano_fin = preferencias
-                generos.append(genero)
+                if genero not in generos:
+                    generos.append(genero)
                 epoca = (ano_inicio, ano_fin)
                 if epoca not in epocas:
                     epocas.append(epoca)
