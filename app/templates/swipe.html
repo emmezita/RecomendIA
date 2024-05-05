@@ -28,12 +28,12 @@
           </div>
         </button>
       </div>
-      <div class="navbar__item navbar__item--right">
-        <i class="fa fa-bars navbar__icon"></i>
+      <div>
+        <a style="font-size: 24px;" class="me-3">
+          <i class="fa fa-sign-out" style="color: white;"></i>
+        </a>
       </div>
     </div>
-
-      <!-- El resto de tu código -->
     
     <div class="tinder">
         <div class="tinder--status">
@@ -41,17 +41,18 @@
           <i class="fa fa-heart"></i>
           <i class="fa fa-remove"></i>
         </div>
-      
+
         <div class="tinder--cards">
           {% for recomendacion in recomendaciones %}
           <div class="tinder--card">
-            <h3>{{ recomendacion.title }}</h3>
-            <p>{{ recomendacion.description }}</p>
-            <img src="https://image.tmdb.org/t/p/w500{{ recomendacion.image_url }}" alt="{{ recomendacion.title }}" style="width: 100%; height: auto;">          
+            <!-- <p>{{ recomendacion.description }}</p> -->
+            <div class="tinder--card-image h-[100%]">
+              <img class="object-cover w-full h-full" src="https://image.tmdb.org/t/p/w500{{ recomendacion.image_url }}" alt="{{ recomendacion.title }}">
+            </div>
           </div>
           {% endfor %}
         </div>
-      
+
         <div class="tinder--buttons">
           <button id="nolove"><i class="fa fa-heart-crack"></i></button>
           <button id="ignore"><i class="fa fa-remove"></i></button>
