@@ -37,3 +37,31 @@ document.getElementById('togglePasswordcf').addEventListener('click', function (
       eyeIcon.classList.add('hidden');
     }
 });
+
+
+function showAlertAndRedirect(message) {
+    alert(message); // Mostrar el mensaje emergente
+    window.location.href = "/login"; // Redirigir a la página de inicio de sesión
+}
+
+document.getElementById("registerForm").addEventListener("submit", function(event) {
+    event.preventDefault(); // Prevenir el envío del formulario por defecto
+
+    fetch('/register', {
+        method: 'POST',
+        body: new FormData(event.target)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlertAndRedirect(data.success); // Mostrar mensaje de éxito y redirigir
+        } else {
+            alert(data.error); // Mostrar mensaje de error
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+});
+
+

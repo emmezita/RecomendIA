@@ -1,24 +1,67 @@
 from flask import Flask, redirect, url_for, render_template, request, jsonify, session
 import psycopg2
 import os
+import requests
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import pandas as pd
+import pickle
+
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
 # Conexión con la bd
 conn = psycopg2.connect(
-    dbname="bd_recomend",
-    user="postgres",
-    password="1234",
-    host="localhost"
+    dbname="knoguera",
+    user="knoguera",
+    password="123456",
+    host="labs-dbservices01.ucab.edu.ve"
 )
+
+def cargar_datos():
+    movies_df = pd.read_csv("app/static/movies-dataset.csv")
+    return movies_df
+
+# Cargar los datos al iniciar la aplicación
+movies_df = cargar_datos()
+
+# Eliminar filas con valores np.nan en las columnas 'genre_id' y 'age_release'
+df = movies_df.dropna(subset=['genre_id', 'age_release', 'description'])
+
+# Concatenar columnas 'genre_id' y 'age_release' para obtener un texto combinado
+df['combined_text'] = df['genre_id'].astype(str) + ' ' + df['age_release'].astype(str) + ' ' + df['description'].astype(str)
+
+# Crear un TfidfVectorizer
+tfidf_vectorizer = TfidfVectorizer(lowercase=True, stop_words='english')
+
+# Ajustar y transformar los documentos
+tfidf_matrix = tfidf_vectorizer.fit_transform(df['combined_text'])
+
+# Guardar la matriz TF-IDF
+# with open('app/static/tfidf_matrix.pkl', 'wb') as f:
+#     pickle.dump(tfidf_matrix, f)
+
+# Guardar el modelo tfidf_vectorizer para futuras transformaciones
+# with open('app/static/tfidf_vectorizer.pkl', 'wb') as f:
+#     pickle.dump(tfidf_vectorizer, f)
+
+# Cargar la matriz TF-IDF y el modelo TfidfVectorizer
+# with open('app/static/tfidf_matrix.pkl', 'rb') as f:
+#     tfidf_matrix = pickle.load(f)
+
+# with open('app/static/tfidf_vectorizer.pkl', 'rb') as f:
+#     tfidf_vectorizer = pickle.load(f)
+
+
+# RUTAS DE LA APLICACION
 
 @app.route("/")
 def index():
-    return redirect(url_for('start'))
+    return redirect(url_for('welcome'))
 
-@app.route('/start')
-def start():
+@app.route('/welcome')
+def welcome():
     return render_template('start.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -28,14 +71,23 @@ def login():
         password = request.form['password']
 
         cur = conn.cursor()
-        cur.execute("SELECT * FROM public.\"Usuario\" WHERE usuario_id = %s", (email,))
+        cur.execute("SELECT * FROM public.\"usuario\" WHERE usuario_email = %s", (email,))
         result = cur.fetchone()
 
         if result:
-            if result[1] == password:
-                session['email'] = email
-                name = result[2] 
-                return redirect(url_for('home', name=name))
+            if result[3] == password:
+                name = result[1]
+                usuario_id = result[0]
+                session['usuario_id'] = usuario_id
+                session['usuario_nombre'] = name
+                # Aquí se verifica si el usuario tiene preferencias registradas
+                cur.execute("SELECT COUNT(*) FROM public.preferenciasusuario WHERE usuario_id = %s", (usuario_id,))
+                pref_count = cur.fetchone()[0]
+                cur.close()
+                if pref_count > 0:
+                    return redirect(url_for('swipe'))
+                else:
+                    return redirect(url_for('home'))
             else:
                 return jsonify({'error': 'Clave inválida.'}), 400
         else:
@@ -56,26 +108,164 @@ def register():
             return jsonify({'error': 'Las contraseñas no coinciden.'}), 400
 
         cur = conn.cursor()
-        cur.execute("SELECT COUNT(*) FROM public.\"Usuario\" WHERE usuario_id = %s", (email,))
+        cur.execute("SELECT COUNT(*) FROM public.\"usuario\" WHERE usuario_email = %s", (email,))
         result = cur.fetchone()[0]
 
         if result > 0:
             return jsonify({'error': 'El correo electrónico ya está registrado.'}), 400
         else:
-            cur.execute("INSERT INTO public.\"Usuario\" (usuario_id, usuario_password, usuario_name) VALUES (%s, %s, %s)", (email, password, fullname))
+            cur.execute("INSERT INTO public.\"usuario\" (usuario_nombre, usuario_email, usuario_password) VALUES (%s, %s, %s)", (fullname, email, password))
             conn.commit()
             cur.close()
             return jsonify({'success': 'Usuario registrado correctamente.'}), 200
 
     return render_template('register.html')
 
-@app.route('/home')
-def home(name=None):
-    return render_template('home.html', name=name)
+@app.route('/home', methods=['GET', 'POST'])
+def home():
 
-@app.route('/swipe')
+    usuario_id = session.get('usuario_id')
+    if usuario_id is None:
+        return "Error: No se pudo obtener el ID del usuario"
+
+    if request.method == 'POST':
+        generos = request.form.getlist('generos')
+        epocas = request.form.getlist('epocas')
+
+        try:
+            cur = conn.cursor()
+            for genero in generos:
+                for epoca in epocas:
+                    ano_inicio, ano_fin = epoca.split('-')
+                    cur.execute("INSERT INTO PreferenciasUsuario (usuario_id, genero, ano_inicio, ano_fin) VALUES (%s, %s, %s, %s)", (usuario_id, genero, ano_inicio, ano_fin))
+
+            conn.commit()
+
+            cur.close()
+            conn.close()
+
+            return redirect(url_for('swipe'))
+
+        except psycopg2.Error as e:
+            conn.rollback()
+            return f"Error al guardar las preferencias: {e}"
+
+    return render_template('home.html', id=id)
+
+import requests
+
+def obtener_recomendaciones(genre_ids, year_ranges, tfidf_matrix, tfidf_vectorizer, n=5):
+    recommended_movies = []
+
+    for genre_id in genre_ids:
+        for year_range in year_ranges:
+            if len(recommended_movies) >= n:
+                break
+
+            min_year, max_year = year_range
+
+            # Calcular TF-IDF del texto de entrada
+            input_text = f"Genre: {genre_id}, Years: {min_year}-{max_year}"
+            input_tfidf = tfidf_vectorizer.transform([input_text])
+
+            # Calcular similitud coseno
+            similarities = cosine_similarity(input_tfidf, tfidf_matrix)
+
+            # Obtener índices de las películas más similares
+            similar_indices = similarities.argsort(axis=1)[:, -n-1:-1]
+
+            # Obtener títulos, genre_id y age_release de las películas recomendadas
+            for idx in similar_indices[0]:
+                if len(recommended_movies) >= n:
+                    break
+
+                title = df.iloc[idx]['title']
+                genre_id = df.iloc[idx]['genre_id']
+                age_release = df.iloc[idx]['age_release']
+                image_url = df.iloc[idx]['image_url']
+                recommended_movies.append({'title': title, 'genre_id': genre_id, 'age_release': age_release, 'image_url': image_url})
+
+    return recommended_movies[:n]
+
+
+@app.route('/swipe', methods=['GET', 'POST'])
 def swipe():
-    return render_template('swipe.html')
+    usuario_id = session.get('usuario_id')
+    if usuario_id is None:
+        return "Error: No se pudo obtener el ID del usuario"
+    try:
+        
+        # Obtener las preferencias del usuario de la base de datos (aquí debes implementar la lógica)
+        cur = conn.cursor()
+        cur.execute("SELECT DISTINCT genero, ano_inicio, ano_fin FROM PreferenciasUsuario WHERE usuario_id = %s", (usuario_id,))    
+
+        preferencias = cur.fetchall()
+        
+        cur.close()
+
+        if preferencias:
+            generos = []
+            epocas = []
+            for preferencias in preferencias:
+                genero, ano_inicio, ano_fin = preferencias
+                generos.append(genero)
+                epocas.append((ano_inicio, ano_fin))
+        else:
+            print(f"No se encontró al usuario con ID {usuario_id}")
+            return None
+
+        # Obtener recomendaciones de películas para el usuario
+        recomendaciones = obtener_recomendaciones(generos, epocas, tfidf_matrix, tfidf_vectorizer, n=10)
+        print(recomendaciones)
+
+        # Pasar las recomendaciones a la plantilla swipe.html para mostrarlas en la interfaz de usuario
+        return render_template('swipe.html', recomendaciones=recomendaciones)
+        
+    except Exception as e:
+        return f"Error al obtener las recomendaciones: {e}"
+    
+# FUNCIONES DE LA API
+
+# # Función para acceder a la API de TMDb y obtener películas populares
+# @app.route('/obtener_peliculas')
+# def obtener_peliculas():
+#     url = "https://api.themoviedb.org/3/discover/movie"
+#     headers = {
+#         "accept": "application/json",
+#         "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzZDk4MTNmN2QyMDlmZjhkZmZlODFhYWY4ZmRkNTY1YiIsInN1YiI6IjY2MzZhOGI3ZTkyZDgzMDEyNGQzM2NmMCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.3jTtHSc5yMrEhPzP2MU-7mxI72TFrUqxG3ZmPgbOLbc"
+#     }
+#     params = {
+#         "api_key": "3d9813f7d209ff8dffe81aaf8fdd565b"
+#     }
+#     all_movies = []
+
+#     response = requests.get(url, headers=headers, params=params)
+
+#     if response.status_code == 200:
+#         data = response.json()
+#         # Iterar sobre cada película en los resultados
+#         for movie in data['results']:
+#             # Crear un diccionario con los campos que deseas
+#             movie_info = {
+#                 'title': movie['title'],
+#                 'genres': [genre_id for genre_id in movie['genre_ids']],
+#                 'release_year': movie['release_date'][:4],
+#                 'overview': movie['overview'],
+#                 'poster_path': movie['poster_path']
+#             }
+#             all_movies.append(movie_info)
+
+#         return jsonify(all_movies)
+#     else:
+#         return jsonify({'error': 'No se pudieron obtener las películas'}), response.status_code
+
+@app.route('/genres', methods=['GET'])
+def get_genres():
+    url = "https://api.themoviedb.org/3/genre/movie/list?language=en"
+    headers = { "accept": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJkMGI3OTVhMjQ2MzBkYTRhZjVkMTgwOTJkZGNlODE4MSIsInN1YiI6IjY2MjJhMTAwZTRjOWViMDBjN2Y0ZTFjYSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.y6uNWZ--j5-V1-HTOdWk59EiCjvrNRMNHPzAwtu8ncg" }
+    response = requests.get(url, headers=headers)
+    genres = response.json().get('genres', [])
+    return jsonify(genres)
 
 if __name__ == '__main__':
     app.run(debug=True)
