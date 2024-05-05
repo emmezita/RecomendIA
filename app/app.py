@@ -20,11 +20,11 @@ conn = psycopg2.connect(
 
 @app.route("/")
 def index():
-    return redirect(url_for('start'))
+    return redirect(url_for('welcome'))
 
-@app.route('/start')
-def start():
-    return render_template('start.html')
+@app.route('/welcome')
+def welcome():
+    return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -49,7 +49,7 @@ def login():
                 if pref_count > 0:
                     return redirect(url_for('swipe'))
                 else:
-                    return redirect(url_for('home', name=name))
+                    return redirect(url_for('home'))
             else:
                 return jsonify({'error': 'Clave inválida.'}), 400
         else:
@@ -83,37 +83,36 @@ def register():
 
     return render_template('register.html')
 
-@app.route('/home/<name>', methods=['GET', 'POST'])
-def home(name=None):
-    
+@app.route('/home', methods=['GET', 'POST'])
+def home():
+
     usuario_id = session.get('usuario_id')
     if usuario_id is None:
         return "Error: No se pudo obtener el ID del usuario"
-        
+
     if request.method == 'POST':
         generos = request.form.getlist('generos')
         epocas = request.form.getlist('epocas')
 
         try:
             cur = conn.cursor()
-
             for genero in generos:
                 for epoca in epocas:
                     ano_inicio, ano_fin = epoca.split('-')
                     cur.execute("INSERT INTO PreferenciasUsuario (usuario_id, genero, ano_inicio, ano_fin) VALUES (%s, %s, %s, %s)", (usuario_id, genero, ano_inicio, ano_fin))
 
             conn.commit()
-            
+
             cur.close()
             conn.close()
-            
+
             return redirect(url_for('swipe'))
-        
+
         except psycopg2.Error as e:
             conn.rollback()
             return f"Error al guardar las preferencias: {e}"
 
-    return render_template('home.html', name=name)
+    return render_template('home.html', id=id)
 
 
 @app.route('/swipe')
@@ -144,17 +143,17 @@ def swipe():
 #             # Crear un diccionario con los campos que deseas
 #             movie_info = {
 #                 'title': movie['title'],
-#                 'genres': [genre_id for genre_id in movie['genre_ids']], 
-#                 'release_year': movie['release_date'][:4], 
+#                 'genres': [genre_id for genre_id in movie['genre_ids']],
+#                 'release_year': movie['release_date'][:4],
 #                 'overview': movie['overview'],
 #                 'poster_path': movie['poster_path']
 #             }
 #             all_movies.append(movie_info)
-        
+
 #         return jsonify(all_movies)
 #     else:
 #         return jsonify({'error': 'No se pudieron obtener las películas'}), response.status_code
-    
+
 @app.route('/genres', methods=['GET'])
 def get_genres():
     url = "https://api.themoviedb.org/3/genre/movie/list?language=en"

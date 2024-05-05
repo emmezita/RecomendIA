@@ -6,37 +6,47 @@
     <title>RecomendIA</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='src/main.css') }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}"> 
-</head>
-<body>
-    <div style="display: flex">
-        <h1 style="color: white; font-size: 24px; font-family: poppins; padding: 35px;">¡Hola {{ name }}!</h1>
-        <a href="{{ url_for('login') }}" style="color: red; float: right; font-size: 24px; font-family: poppins; padding: 35px; margin-left: 1400px;">Cerrar sesión</a>
-    </div>
-
-    <div class="flex min-h-full flex-col justify-center px-16 py-24 lg:px-8">
-        <div class="sm:mx-auto sm:w-full sm:max-w-sm ">
-            <img class="mx-auto h-32 w-auto logo-img" src="{{ url_for('static', filename='images/logo.svg') }}" alt="Your Company">
-            <h1 class="mt-10 text-center text-2xl leading-9 tracking-tight text-white font-poppins font-semibold title">Vamos a conocerte</h1>
-            <form action="{{ url_for('home', name=name) }}" method="post">
-                <div class="select-container">
-                    <label for="generos" class="text-white">Géneros</label>
-                    <select id="generos" name="generos" multiple style="padding: 3% !important; border-radius: 25px">
-                    </select>
-                </div>
-                <div class="select-container">
-                    <label for="epocas" class="text-white">Años de preferencia</label>
-                    <select id="epocas" name="epocas" multiple style="padding: 3% !important; border-radius: 25px">
-                    </select>
-                </div>
-                <div class="form-container">
-                    <input type="submit" value="Guardar preferencias">
-                </div>
-            </form>
-        </div>
-    </div>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+    <script src="https://kit.fontawesome.com/0109ddc3c5.js" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+</head>
+<body>
+    <!-- <div class="flex justify-between bg-slate-600 "> -->
+    <div style="display: flex; justify-content: space-between; position: fixed; top: 0; left: 0; right: 0; background-color: rgba(80, 30, 30, 0.761); padding: 10px; align-items: center;">
+        <h1 style="color: white; font-size: 20px; font-family: poppins; ">¡Hola, {{ session['usuario_nombre'] }}!</h1>
+        <a href="{{ url_for('login') }}" style="font-size: 24px;" class="me-3">
+            <i class="fa fa-sign-out" style="color: red;"></i>
+        </a>
+    </div>
+
+    <div class="flex min-h-full flex-col justify-center px-16 py-24 lg:px-8 h-[100dvh]">
+      <div class="sm:mx-auto sm:w-full sm:max-w-sm ">
+        <img class="mx-auto h-20 w-auto" src="{{ url_for('static', filename='images/logo.svg') }}" alt="Your Company">
+        <h2 class="mt-10 text-center text-2xl leading-9 tracking-tight text-white font-poppins font-semibold ">Vamos a Conocerte</h2>
+      </div>
+        <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+            <form action="{{ url_for('home') }}" method="post">
+                <div class="select-container">
+                    <label for="generos" class="text-sm leading-6 text-white font-hind font-semibold">Géneros</label>
+                    <select id="generos" name="generos" multiple style=" border-radius: 25px">
+                    </select>
+                </div>
+                <div class="select-container">
+                    <label for="epocas" class="text-sm leading-6 text-white font-hind font-semibold">Años de preferencia</label>
+                    <select class="bg-dark-2" id="epocas" name="epocas" multiple style=" border-radius: 25px">
+                    </select>
+                </div>
+                <div class="py-6 px-[20px]">
+                    <button id="guardar" type="submit" class="flex w-full justify-center rounded-3xl bg-white px-3 py-3 text-sm leading-6 text-rojo-medio shadow-sm hover:bg-light transition-colors duration-200 focus-visible:bg-light focus-visible:text-rojo-claro font-poppins font-medium">Guardar Preferencias</button>
+                </div>
+            </form>
+
+        </div>
+      </div>
+    </div>
+
     <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+
+
 </body>
-</html>

@@ -3,14 +3,14 @@ body {
 }
 
 .slc-container {
-    margin-top: 20px;
+    /* margin-top: 20px; */
 }
 
 .select-container {
     position: relative;
-    width: 100%;
-    padding: 30px;
-    font-size: 20px;
+    /* width: 100%; */
+    padding: 20px;
+    font-size: 15px;
 }
 
 
@@ -24,10 +24,15 @@ body {
     cursor: pointer;
 }
 
+.select2-container--default.select2-container--focus .select2-selection--multiple {
+    border: 2px solid rgb(181 31 31);
+}
+
 .select2-container--default .select2-selection--multiple {
-    background-color:  #1B1E2F;
+    /* background-color:  #1B1E2F; */
+    background-color: rgb(35 37 56);
     border-radius: 25px;
-    padding: 3%;
+    padding: 2%;
 }
 
 .title {

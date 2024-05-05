@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sing in</title>
+    <title>Registro</title>
     <link rel="stylesheet" href="{{url_for('static', filename='src/main.css')}}">
     <style>
         body {
@@ -13,8 +13,7 @@
 </head>
 
 <body>
-    
-    <div class="flex min-h-full flex-col justify-center px-16 py-6 lg:px-8">
+    <div class="flex min-h-full flex-col justify-center px-16 py-6 lg:px-8 h-[100dvh]">
         <div class="sm:mx-auto sm:w-full sm:max-w-sm ">
           <img class="mx-auto h-20 w-auto" src="{{ url_for('static', filename='images/logo.svg') }}" alt="Your Company">
           <h2 class="mt-6 text-center text-2xl leading-9 tracking-tight text-white font-poppins font-semibold ">Crear cuenta</h2>
@@ -60,7 +59,7 @@
                       <div class="absolute inset-y-0 left-0 flex items-center pl-3">
                           <span class="absolute left-3 top-1/2 transform -translate-y-1/2">
                             <svg fill="#B51F1F" width="25px" height="25px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17,9V7A5,5,0,0,0,7,7V9a3,3,0,0,0-3,3v7a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V12A3,3,0,0,0,17,9ZM9,7a3,3,0,0,1,6,0V9H9Zm9,12a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V12a1,1,0,0,1,1-1H17a1,1,0,0,1,1,1Z"/></svg>
-                          </span>             
+                          </span>
                       </div>
                   </div>
               </div>
@@ -77,14 +76,14 @@
                       <div class="absolute inset-y-0 left-0 flex items-center pl-3">
                           <span class="absolute left-3 top-1/2 transform -translate-y-1/2">
                             <svg fill="#B51F1F" width="25px" height="25px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17,9V7A5,5,0,0,0,7,7V9a3,3,0,0,0-3,3v7a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V12A3,3,0,0,0,17,9ZM9,7a3,3,0,0,1,6,0V9H9Zm9,12a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V12a1,1,0,0,1,1-1H17a1,1,0,0,1,1,1Z"/></svg>
-                          </span>             
+                          </span>
                       </div>
                   </div>
               </div>
             </div>
       
             <div class="py-4">
-              <button type="submit" class="flex w-full justify-center rounded-3xl bg-white px-3 py-3 text-sm font-semibold leading-6 text-rojo-medio shadow-sm hover:bg-light focus-visible:bg-light focus-visible:text-rojo-claro font-poppins font-medium">Registrarse</button>
+              <button type="submit" class="flex w-full justify-center rounded-3xl bg-white px-3 py-3 text-sm font-semibold leading-6 text-rojo-medio shadow-sm hover:bg-light transition-colors duration-200 focus-visible:bg-light focus-visible:text-rojo-claro font-poppins font-medium">Registrarse</button>
             </div>
           </form>
       
@@ -94,7 +93,7 @@
           </p>
         </div>
       </div>
-    </div>  
+    </div>
     <script src="{{url_for('static', filename='js/register.js')}}"></script>
 
 </body>
