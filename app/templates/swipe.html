@@ -29,12 +29,12 @@
         </button>
       </div>
       <div>
-        <a style="font-size: 24px;" class="me-3">
+        <a href="{{ url_for('login') }}" style="font-size: 24px;" class="me-3">
           <i class="fa fa-sign-out" style="color: white;"></i>
         </a>
       </div>
     </div>
-    
+
     <div class="tinder">
         <div class="tinder--status">
           <i class="fa fa-heart-crack"></i>
@@ -45,6 +45,9 @@
         <div class="tinder--cards">
           {% for recomendacion in recomendaciones %}
           <div class="tinder--card">
+            <button class="info-button" onclick="showModal({{ recomendacion.id }})">
+              <i class="fas fa-info-circle"></i>
+            </button>
             <!-- <p>{{ recomendacion.description }}</p> -->
             <div class="tinder--card-image h-[100%]">
               <img class="object-cover w-full h-full" src="https://image.tmdb.org/t/p/w500{{ recomendacion.image_url }}" alt="{{ recomendacion.title }}">
@@ -62,6 +65,36 @@
 
     <script src="{{ url_for('static', filename='js/hammer.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/swipe.js') }}"></script>
+    <dialog id="info_modal" class="modal">
+      <div class="modal-box">
+        <h3 class="font-bold text-lg movie-title"></h3>
+        <p class="py-4 movie-desc"></p>
+        <div class="modal-action">
+          <form method="dialog">
+            <button class="btn">Cerrar</button>
+          </form>
+        </div>
+      </div>
+    </dialog>
+
+    <script src="{{url_for('static', filename='js/swipe.js')}}"></script>
+
+    <script>
+      // cambiar la informacion que se muestra en el modal
+      function showModal(id) {
+        console.log(id);
+        var dialog = document.getElementById('info_modal');
+
+        // buscar la informacion de la pelicula dentro del json de recomendaciones
+
+        document.querySelector('.movie-title').innerText = 'Movie Title';
+        document.querySelector('.movie-desc').innerText = 'Movie Description';
+
+        dialog.showModal();
+      }
+
+    </script>
+
 
 </body>
 </html>
