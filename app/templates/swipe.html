@@ -28,8 +28,10 @@
           </div>
         </button>
       </div>
-      <div class="navbar__item navbar__item--right">
-        <i class="fa fa-bars navbar__icon"></i>
+      <div>
+        <a style="font-size: 24px;" class="me-3">
+          <i class="fa fa-sign-out" style="color: white;"></i>
+        </a>
       </div>
     </div>
     
@@ -44,7 +46,7 @@
           {% for recomendacion in recomendaciones %}
           <div class="tinder--card">
             <!-- <p>{{ recomendacion.description }}</p> -->
-            <div class="tinder--card-image h-[95%]">
+            <div class="tinder--card-image h-[100%]">
               <img class="object-cover w-full h-full" src="https://image.tmdb.org/t/p/w500{{ recomendacion.image_url }}" alt="{{ recomendacion.title }}">
             </div>
           </div>

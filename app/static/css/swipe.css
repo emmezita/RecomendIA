@@ -70,9 +70,8 @@ body {
 
 .tinder--card {
   display: inline-block;
-  width: 80vw;
-  max-width: 400px;
-  height: 65vh;
+  width: 334px;
+  height: 500px;
   background: #767e99;
   overflow: hidden;
   position: absolute;
@@ -82,13 +81,6 @@ body {
   cursor: -moz-grab;
   cursor: grab;
   border-radius: 14px;
-}
-
-@media (max-width: 640px) {
-  .tinder--card {
-    border-right: 20px solid #B51F1F;
-    border-bottom: 20px solid #FFFFFF;
-  }
 }
 
 .moving.tinder--card {
@@ -102,10 +94,6 @@ body {
     width: 100%;
     object-fit: contain;
     pointer-events: none;
-}
-
-.tinder--card img {
-
 }
 
 .tinder--card h3 {
