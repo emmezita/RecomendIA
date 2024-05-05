@@ -154,9 +154,13 @@ import requests
 
 def obtener_recomendaciones(genre_ids, year_ranges, n=10):
     # Filtrar DataFrame por géneros y rango de años
-    filtered_df = df[(df['genre_id'].isin(genre_ids)) & 
-                     (df['age_release'].apply(lambda x: any(min_year <= x <= max_year for min_year, max_year in year_ranges)))]
-    
+
+    print (df)
+    print (genre_ids)
+    print (year_ranges)
+
+    filtered_df = df[df['genre_id'].apply(lambda x: any(genre in x.split(',') for genre in map(str, genre_ids))) &  df['age_release'].apply(lambda x: any(str(min_year) <= str(x) <= str(max_year) for min_year, max_year in year_ranges)) ]                
+        
     # Generar texto de entrada para TF-IDF basado en múltiples géneros y rangos de años
     genres_text = ' '.join([f"genre_{genre_id}" for genre_id in genre_ids])
     years_text = ' '.join([f"{year[0]}-{year[1]}" for year in year_ranges])
@@ -174,7 +178,7 @@ def obtener_recomendaciones(genre_ids, year_ranges, n=10):
     for idx in similar_indices:
         if idx < len(filtered_df):  # Asegurar que el índice esté dentro del rango del DataFrame filtrado
             movie = filtered_df.iloc[idx]
-            recommended_movies.append({'title': movie['title'], 'genre_id': movie['genre_id'], 'age_release': movie['age_release']})
+            recommended_movies.append({'title': movie['title'], 'genre_id': movie['genre_id'], 'age_release': movie['age_release'], 'image_url': movie['image_url']})
 
     return recommended_movies[:n]  # Asegurar devolver hasta n recomendaciones
 
