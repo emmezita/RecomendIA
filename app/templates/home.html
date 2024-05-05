@@ -21,18 +21,12 @@
             <form action="{{ url_for('home', name=name) }}" method="post">
                 <div class="select-container">
                     <label for="generos" class="text-white">Géneros</label>
-                    <select id="genres" name="generos" multiple style="padding: 3% !important; border-radius: 25px">
+                    <select id="generos" name="generos" multiple style="padding: 3% !important; border-radius: 25px">
                     </select>
                 </div>
                 <div class="select-container">
                     <label for="epocas" class="text-white">Años de preferencia</label>
                     <select id="epocas" name="epocas" multiple style="padding: 3% !important; border-radius: 25px">
-                        <option value="1900-1910">1900-1910</option>
-                        <option value="1911-1920">1911-1920</option>
-                        <option value="1921-1930">1921-1930</option>
-                        <option value="1931-1940">1931-1940</option>
-                        <option value="1941-1950">1941-1950</option>
-
                     </select>
                 </div>
                 <div class="form-container">
