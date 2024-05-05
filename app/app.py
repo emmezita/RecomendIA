@@ -30,12 +30,10 @@ movies_df = cargar_datos()
 df = movies_df.dropna(subset=['genre_id', 'age_release', 'description'])
 
 # Concatenar columnas 'genre_id' y 'age_release' para obtener un texto combinado
-df['combined_text'] = df['genre_id'].astype(str) + ' ' + df['age_release'].astype(str) + ' ' + df['description'].astype(str)
+df['combined_text'] = df.apply(lambda x: f"{x['genre_id']} {str(x['age_release'])[:3]}0s {x['description']}", axis=1)
 
 # Crear un TfidfVectorizer
 tfidf_vectorizer = TfidfVectorizer(lowercase=True, stop_words='english')
-
-# Ajustar y transformar los documentos
 tfidf_matrix = tfidf_vectorizer.fit_transform(df['combined_text'])
 
 # Guardar la matriz TF-IDF
@@ -154,38 +152,31 @@ def home():
 
 import requests
 
-def obtener_recomendaciones(genre_ids, year_ranges, tfidf_matrix, tfidf_vectorizer, n=5):
+def obtener_recomendaciones(genre_ids, year_ranges, n=10):
+    # Filtrar DataFrame por géneros y rango de años
+    filtered_df = df[(df['genre_id'].isin(genre_ids)) & 
+                     (df['age_release'].apply(lambda x: any(min_year <= x <= max_year for min_year, max_year in year_ranges)))]
+    
+    # Generar texto de entrada para TF-IDF basado en múltiples géneros y rangos de años
+    genres_text = ' '.join([f"genre_{genre_id}" for genre_id in genre_ids])
+    years_text = ' '.join([f"{year[0]}-{year[1]}" for year in year_ranges])
+    input_text = f"{genres_text} {years_text}"
+    input_tfidf = tfidf_vectorizer.transform([input_text])
+
+    # Calcular similitud coseno
+    similarities = cosine_similarity(input_tfidf, tfidf_matrix)
+
+    # Obtener índices de las películas más similares
+    similar_indices = similarities.argsort(axis=1)[:, -n-1:-1][0]
+
+    # Construir la lista de recomendaciones
     recommended_movies = []
+    for idx in similar_indices:
+        if idx < len(filtered_df):  # Asegurar que el índice esté dentro del rango del DataFrame filtrado
+            movie = filtered_df.iloc[idx]
+            recommended_movies.append({'title': movie['title'], 'genre_id': movie['genre_id'], 'age_release': movie['age_release']})
 
-    for genre_id in genre_ids:
-        for year_range in year_ranges:
-            if len(recommended_movies) >= n:
-                break
-
-            min_year, max_year = year_range
-
-            # Calcular TF-IDF del texto de entrada
-            input_text = f"Genre: {genre_id}, Years: {min_year}-{max_year}"
-            input_tfidf = tfidf_vectorizer.transform([input_text])
-
-            # Calcular similitud coseno
-            similarities = cosine_similarity(input_tfidf, tfidf_matrix)
-
-            # Obtener índices de las películas más similares
-            similar_indices = similarities.argsort(axis=1)[:, -n-1:-1]
-
-            # Obtener títulos, genre_id y age_release de las películas recomendadas
-            for idx in similar_indices[0]:
-                if len(recommended_movies) >= n:
-                    break
-
-                title = df.iloc[idx]['title']
-                genre_id = df.iloc[idx]['genre_id']
-                age_release = df.iloc[idx]['age_release']
-                image_url = df.iloc[idx]['image_url']
-                recommended_movies.append({'title': title, 'genre_id': genre_id, 'age_release': age_release, 'image_url': image_url})
-
-    return recommended_movies[:n]
+    return recommended_movies[:n]  # Asegurar devolver hasta n recomendaciones
 
 
 @app.route('/swipe', methods=['GET', 'POST'])
@@ -209,13 +200,18 @@ def swipe():
             for preferencias in preferencias:
                 genero, ano_inicio, ano_fin = preferencias
                 generos.append(genero)
-                epocas.append((ano_inicio, ano_fin))
+                epoca = (ano_inicio, ano_fin)
+                if epoca not in epocas:
+                    epocas.append(epoca)
         else:
             print(f"No se encontró al usuario con ID {usuario_id}")
             return None
+        
+        print(generos)
+        print(epocas)
 
         # Obtener recomendaciones de películas para el usuario
-        recomendaciones = obtener_recomendaciones(generos, epocas, tfidf_matrix, tfidf_vectorizer, n=10)
+        recomendaciones = obtener_recomendaciones(generos, epocas, 5)
         print(recomendaciones)
 
         # Pasar las recomendaciones a la plantilla swipe.html para mostrarlas en la interfaz de usuario
