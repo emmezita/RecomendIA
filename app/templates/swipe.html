@@ -80,6 +80,10 @@
     <script src="{{url_for('static', filename='js/swipe.js')}}"></script>
 
     <script>
+
+      let recomendaciones_json = {{ recomendaciones | tojson }};
+      console.log(recomendaciones_json);
+
       // cambiar la informacion que se muestra en el modal
       function showModal(id) {
         console.log(id);
