@@ -56,13 +56,11 @@
           <button id="nolove"><i class="fa fa-heart-crack"></i></button>
           <button id="ignore"><i class="fa fa-remove"></i></button>
           <button id="love"><i class="fa fa-heart"></i></button>
-          <!-- <button id="nolove"><i class="custom-dislike"></i></button>
-          <button id="nope"><i class="custom-ignore"></i></button>
-          <button id="love"><i class="custom-like"></i></button> -->
         </div>
     </div>
 
-    <script src="{{url_for('static', filename='js/swipe.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/hammer.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/swipe.js') }}"></script>
 
 </body>
 </html>

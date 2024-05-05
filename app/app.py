@@ -266,5 +266,35 @@ def get_genres():
     genres = response.json().get('genres', [])
     return jsonify(genres)
 
+
+@app.route('/save_interaction', methods=['POST'])
+def save_interaction():
+    # Obtener los datos de la solicitud AJAX
+    data = request.json
+    movie_id = data.get('movie_id')
+    action = data.get('action')
+    usuario_id = session.get('usuario_id')
+    
+    if usuario_id is None:
+        return jsonify({'error': 'No se pudo obtener el ID del usuario'}), 400
+    
+    if action == 'love':
+        valoracion = 1
+    elif action == 'ignore':
+        valoracion = 2
+    else:  # action == 'nolove'
+        valoracion = 0
+
+    try:
+        cur = conn.cursor()
+        cur.execute("INSERT INTO interaccionesusuariopelicula (usuario_id, pelicula_id, valoracion) VALUES (%s, %s, %s)",
+                    (usuario_id, movie_id, valoracion))
+        conn.commit()
+        cur.close()
+        return jsonify({'success': 'Interacción del usuario guardada correctamente.'}), 200
+    except psycopg2.Error as e:
+        conn.rollback()
+        return jsonify({'error': f'Error al guardar la interacción del usuario: {e}'}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
