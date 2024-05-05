@@ -127,6 +127,15 @@ allCards.forEach(function (el) {
 
         initCards();
 
+        // Obtener el ID de la película
+        var movieId = card.dataset.movieId;
+
+        // Determinar si se está ignorando
+        var ignore = action === 'ignore';
+
+        // Enviar la interacción del usuario al servidor
+        guardar_interaccion(movieId, action, ignore);
+
         event.preventDefault();
       };
     }
@@ -138,3 +147,34 @@ var ignoreListener = createButtonListener('ignore'); // Nuevo listener
 nolove.addEventListener('click', noloveListener);
 love.addEventListener('click', loveListener);
 ignore.addEventListener('click', ignoreListener); // Agregar el listener al boton ignore
+
+// Función para guardar la interacción del usuario
+function guardar_interaccion(movieId, action, ignore) {
+    var valoracion = ignore ? 2 : (action === 'love' ? 1 : 0);
+
+    // Crear un objeto con los datos a enviar
+    var data = {
+        movie_id: movieId,
+        action: action,
+        valoracion: valoracion
+    };
+
+    // Realizar la solicitud AJAX al servidor
+    fetch('/guardar_interaccion', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        if (response.ok) {
+            console.log('Interacción del usuario guardada correctamente.');
+        } else {
+            console.error('Error al guardar la interacción del usuario.');
+        }
+    })
+    .catch(error => {
+        console.error('Error al guardar la interacción del usuario:', error);
+    });
+}

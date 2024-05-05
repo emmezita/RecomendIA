@@ -267,8 +267,8 @@ def get_genres():
     return jsonify(genres)
 
 
-@app.route('/save_interaction', methods=['POST'])
-def save_interaction():
+@app.route('/guardar_interaccion', methods=['POST'])
+def guardar_interaccion():
     # Obtener los datos de la solicitud AJAX
     data = request.json
     movie_id = data.get('movie_id')
