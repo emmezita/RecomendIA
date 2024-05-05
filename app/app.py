@@ -140,7 +140,10 @@ def home():
             conn.commit()
 
             cur.close()
-            conn.close()
+
+            # Mantener los datos del usuario en la sesión
+            session['generos'] = generos
+            session['epocas'] = epocas
 
             return redirect(url_for('swipe'))
 
@@ -180,11 +183,12 @@ def obtener_recomendaciones(genre_ids, year_ranges, n=10):
 @app.route('/swipe', methods=['GET', 'POST'])
 def swipe():
     usuario_id = session.get('usuario_id')
+    generos = session.get('generos')
+    epocas = session.get('epocas')
     if usuario_id is None:
         return "Error: No se pudo obtener el ID del usuario"
     try:
         
-        # Obtener las preferencias del usuario de la base de datos (aquí debes implementar la lógica)
         cur = conn.cursor()
         cur.execute("SELECT DISTINCT genero, ano_inicio, ano_fin FROM PreferenciasUsuario WHERE usuario_id = %s", (usuario_id,))    
 
