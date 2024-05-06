@@ -64,7 +64,7 @@ def obtener_recomendaciones(genre_ids, year_ranges, n):
     for idx in similar_indices:
         if idx < len(df):  # Asegurar que el índice esté dentro del rango del DataFrame original
             movie = df.iloc[idx]
-            recommended_movies.append({'title': movie['title'], 'genre_id': movie['genre_id'], 'age_release': movie['age_release'], 'image_url': movie['image_url']})
+            recommended_movies.append({'movie_id': movie['movie_id'], 'title': movie['title'], 'genre_id': movie['genre_id'], 'age_release': movie['age_release'], 'image_url': movie['image_url']})
     
     return recommended_movies[:n]  # Devolver hasta n recomendaciones
 
@@ -249,7 +249,7 @@ def swipe():
             # Usuario nuevo: Obtener preferencias y generar recomendaciones iniciales
             cur.execute("SELECT DISTINCT genero, ano_inicio, ano_fin FROM PreferenciasUsuario WHERE usuario_id = %s", (usuario_id,))    
             preferencias = cur.fetchall()
-            
+
             if preferencias:
                 generos = list(set([preferencia[0] for preferencia in preferencias]))
                 epocas = list(set([(preferencia[1], preferencia[2]) for preferencia in preferencias]))

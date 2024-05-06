@@ -44,7 +44,7 @@
 
         <div class="tinder--cards">
           {% for recomendacion in recomendaciones %}
-          <div class="tinder--card">
+          <div class="tinder--card" data-movieId="{{ recomendacion.movie_id }}">
             <button class="info-button" onclick="showModal({{ recomendacion.id }})">
               <i class="fas fa-info-circle"></i>
             </button>

@@ -129,6 +129,7 @@ allCards.forEach(function (el) {
 
         // Obtener el ID de la película
         var movieId = card.dataset.movieId;
+        console.log('Valor de movieId:', movieId);
 
         // Determinar si se está ignorando
         var ignore = action === 'ignore';
@@ -154,7 +155,7 @@ function guardar_interaccion(movieId, action, ignore) {
 
     // Crear un objeto con los datos a enviar
     var data = {
-        movie_id: movieId,
+        movie_id: String(movieId),
         action: action,
         valoracion: valoracion
     };
@@ -170,6 +171,7 @@ function guardar_interaccion(movieId, action, ignore) {
     .then(response => {
         if (response.ok) {
             console.log('Interacción del usuario guardada correctamente.');
+            console.log(movieId)
         } else {
             console.error('Error al guardar la interacción del usuario.');
         }
