@@ -66,6 +66,12 @@ def obtener_recomendaciones(genre_ids, year_ranges, n):
             movie = df.iloc[idx]
             recommended_movies.append({'movie_id': movie['movie_id'], 'title': movie['title'], 'genre_id': movie['genre_id'], 'age_release': movie['age_release'], 'image_url': movie['image_url']})
     
+    # Convierte cualquier valor numpy.int64 en int
+    for movie in recommended_movies:
+        for key, value in movie.items():
+            if isinstance(value, np.int64):
+                movie[key] = int(value)
+
     return recommended_movies[:n]  # Devolver hasta n recomendaciones
 
 def actualizar_perfil_usuario(usuario_id):
