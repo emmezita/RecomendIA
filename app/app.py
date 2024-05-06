@@ -5,8 +5,7 @@ import requests
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
-import pickle
-
+import numpy as np
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -18,6 +17,95 @@ conn = psycopg2.connect(
     password="123456",
     host="labs-dbservices01.ucab.edu.ve"
 )
+
+# FUNCIONES PARA EL SISTEMA DE RECOMENDACIÓN
+
+##### FUNCION PARA OBTENER PELÍCULAS VISTAS POR EL USUARIO #####
+def obtener_peliculas_vistas(usuario_id):
+    # Inicializa una lista vacía para almacenar las películas vistas
+    peliculas_vistas = []
+    try:
+        # Crea un nuevo cursor
+        cur = conn.cursor()
+        # Ejecuta una consulta SQL para obtener todas las películas vistas por el usuario
+        cur.execute("SELECT pelicula_id FROM interaccionesusuariopelicula WHERE usuario_id = %s", (usuario_id,))
+        # Obtiene todos los resultados de la consulta
+        resultados = cur.fetchall()
+        # Itera sobre cada fila en los resultados
+        for fila in resultados:
+            # Agrega el ID de la película a la lista de películas vistas
+            peliculas_vistas.append(fila[0])
+        # Cierra el cursor
+        cur.close()
+    except Exception as e:
+        # Imprime cualquier error que ocurra
+        print(f"Error al obtener películas vistas por el usuario {usuario_id}: {e}")
+
+    # Devuelve la lista de películas vistas
+    return peliculas_vistas
+
+def obtener_recomendaciones(genre_ids, year_ranges, n):
+    # Convertir genre_ids y year_ranges a strings y ajustar el formato para coincidir con el entrenamiento
+    genres_text = ','.join(map(str, genre_ids))  # Los géneros simplemente se unen por comas
+    years_text = ' '.join([f"{str(year[0])[:3]}0s" for year in year_ranges])  # Convertir cada rango de años en su década correspondiente
+    
+    # El input_text debe reflejar cómo se ve el combined_text en tu dataset
+    input_text = f"{genres_text} {years_text}"
+    input_tfidf = tfidf_vectorizer.transform([input_text])
+    
+    # Calcular similitud coseno
+    similarities = cosine_similarity(input_tfidf, tfidf_matrix)
+    
+    # Obtener índices de las películas más similares
+    similar_indices = similarities.argsort(axis=1)[:, -n:][0]
+    
+    # Construir la lista de recomendaciones basada en los índices obtenidos
+    recommended_movies = []
+    for idx in similar_indices:
+        if idx < len(df):  # Asegurar que el índice esté dentro del rango del DataFrame original
+            movie = df.iloc[idx]
+            recommended_movies.append({'title': movie['title'], 'genre_id': movie['genre_id'], 'age_release': movie['age_release'], 'image_url': movie['image_url']})
+    
+    return recommended_movies[:n]  # Devolver hasta n recomendaciones
+
+def actualizar_perfil_usuario(usuario_id):
+    # Obtén todas las interacciones del usuario
+    cur = conn.cursor()
+    cur.execute("SELECT pelicula_id, valoracion FROM interaccionesusuariopelicula WHERE usuario_id = %s", (usuario_id,))
+    interacciones = cur.fetchall()
+    
+    # Calcula el vector de características del usuario
+    perfil_usuario = np.zeros(tfidf_matrix.shape[1])  # Asume que tfidf_matrix es una matriz scipy sparse de tamaño (n_peliculas, n_features)
+    for pelicula_id, valoracion in interacciones:
+        # Ajusta los pesos según la valoración
+        peso = 1 if valoracion == 1 else -1 if valoracion == 0 else 0
+        pelicula_idx = df.index[df['movie_id'] == pelicula_id].tolist()[0]  # Asegúrate de tener una columna 'movie_id' en df
+        perfil_usuario += peso * tfidf_matrix[pelicula_idx, :].toarray().flatten()
+    
+    # Normaliza el perfil del usuario
+    if np.linalg.norm(perfil_usuario) > 0:
+        perfil_usuario = perfil_usuario / np.linalg.norm(perfil_usuario)
+    
+    return perfil_usuario
+
+def obtener_recomendaciones_usuario_regular(usuario_id, n):
+    perfil_usuario = actualizar_perfil_usuario(usuario_id)
+    
+    # Calcula la similitud coseno entre el perfil del usuario y todas las películas
+    similitudes = cosine_similarity(perfil_usuario.reshape(1, -1), tfidf_matrix)
+    
+    # Selecciona las películas con mayor similitud que el usuario aún no ha visto
+    peliculas_vistas = obtener_peliculas_vistas(usuario_id)
+    recomendaciones_indices = np.argsort(similitudes.flatten())[::-1]
+    
+    recomendaciones = []
+    for idx in recomendaciones_indices:
+        if df.iloc[idx]['movie_id'] not in peliculas_vistas:
+            recomendaciones.append(df.iloc[idx])
+            if len(recomendaciones) >= n:
+                break
+    
+    return recomendaciones
 
 def cargar_datos():
     movies_df = pd.read_csv("app/static/movies-dataset.csv")
@@ -36,23 +124,8 @@ df['combined_text'] = df.apply(lambda x: f"{x['genre_id']} {str(x['age_release']
 tfidf_vectorizer = TfidfVectorizer(lowercase=True, stop_words='english')
 tfidf_matrix = tfidf_vectorizer.fit_transform(df['combined_text'])
 
-# Guardar la matriz TF-IDF
-# with open('app/static/tfidf_matrix.pkl', 'wb') as f:
-#     pickle.dump(tfidf_matrix, f)
 
-# Guardar el modelo tfidf_vectorizer para futuras transformaciones
-# with open('app/static/tfidf_vectorizer.pkl', 'wb') as f:
-#     pickle.dump(tfidf_vectorizer, f)
-
-# Cargar la matriz TF-IDF y el modelo TfidfVectorizer
-# with open('app/static/tfidf_matrix.pkl', 'rb') as f:
-#     tfidf_matrix = pickle.load(f)
-
-# with open('app/static/tfidf_vectorizer.pkl', 'rb') as f:
-#     tfidf_vectorizer = pickle.load(f)
-
-
-# RUTAS DE LA APLICACION
+# RUTAS DE LA APLICACION WEB PARA LA RECOMENDACIÓN DE PELÍCULAS
 
 @app.route("/")
 def index():
@@ -155,69 +228,42 @@ def home():
 
 import requests
 
-def obtener_recomendaciones(genre_ids, year_ranges, n=10):
-    # Convertir genre_ids y year_ranges a strings y ajustar el formato para coincidir con el entrenamiento
-    genres_text = ','.join(map(str, genre_ids))  # Los géneros simplemente se unen por comas, sin el prefijo "genre_"
-    years_text = ' '.join([f"{str(year[0])[:3]}0s" for year in year_ranges])  # Convertir cada rango de años en su década correspondiente
-    
-    # El input_text debe reflejar cómo se ve el combined_text en tu dataset
-    input_text = f"{genres_text} {years_text}"
-    input_tfidf = tfidf_vectorizer.transform([input_text])
-    
-    # Calcular similitud coseno
-    similarities = cosine_similarity(input_tfidf, tfidf_matrix)
-    
-    # Obtener índices de las películas más similares
-    similar_indices = similarities.argsort(axis=1)[:, -n:][0]
-    
-    # Construir la lista de recomendaciones basada en los índices obtenidos
-    recommended_movies = []
-    for idx in similar_indices:
-        if idx < len(df):  # Asegurar que el índice esté dentro del rango del DataFrame original
-            movie = df.iloc[idx]
-            recommended_movies.append({'title': movie['title'], 'genre_id': movie['genre_id'], 'age_release': movie['age_release'], 'image_url': movie['image_url']})
-    
-    return recommended_movies[:n]  # Devolver hasta n recomendaciones
-
-
-@app.route('/swipe', methods=['GET', 'POST'])
+@app.route('/swipe', methods=['GET'])
 def swipe():
     usuario_id = session.get('usuario_id')
-    generos = session.get('generos')
-    epocas = session.get('epocas')
     if usuario_id is None:
         return "Error: No se pudo obtener el ID del usuario"
-    try:
-        
-        cur = conn.cursor()
-        cur.execute("SELECT DISTINCT genero, ano_inicio, ano_fin FROM PreferenciasUsuario WHERE usuario_id = %s", (usuario_id,))    
 
-        preferencias = cur.fetchall()
+    try:
+        # Verificar si el usuario es nuevo o regular
+        cur = conn.cursor()
+        cur.execute("SELECT 1 FROM interaccionesusuariopelicula WHERE usuario_id = %s LIMIT 1", (usuario_id,))
+        result = cur.fetchone()
+
+        # Si 'result' es None, entonces 'count_interacciones' será 0, de lo contrario será 1
+        count_interacciones = 0 if result is None else 1
+
+        print(f"Contador de interacciones: {count_interacciones}")
+        
+        if count_interacciones == 0:
+            # Usuario nuevo: Obtener preferencias y generar recomendaciones iniciales
+            cur.execute("SELECT DISTINCT genero, ano_inicio, ano_fin FROM PreferenciasUsuario WHERE usuario_id = %s", (usuario_id,))    
+            preferencias = cur.fetchall()
+            
+            if preferencias:
+                generos = list(set([preferencia[0] for preferencia in preferencias]))
+                epocas = list(set([(preferencia[1], preferencia[2]) for preferencia in preferencias]))
+                print (generos, epocas)
+                recomendaciones = obtener_recomendaciones(generos, epocas, 5)
+                print (recomendaciones)
+            else:
+                print(f"No se encontraron preferencias para el usuario con ID {usuario_id}")
+                recomendaciones = []
+        else:
+            # Usuario regular: Generar recomendaciones basadas en interacciones previas
+            recomendaciones = obtener_recomendaciones_usuario_regular(usuario_id, 5)
         
         cur.close()
-
-        if preferencias:
-            generos = []
-            epocas = []
-            for preferencias in preferencias:
-                genero, ano_inicio, ano_fin = preferencias
-                if genero not in generos:
-                    generos.append(genero)
-                epoca = (ano_inicio, ano_fin)
-                if epoca not in epocas:
-                    epocas.append(epoca)
-        else:
-            print(f"No se encontró al usuario con ID {usuario_id}")
-            return None
-        
-        print(generos)
-        print(epocas)
-
-        # Obtener recomendaciones de películas para el usuario
-        recomendaciones = obtener_recomendaciones(generos, epocas, 5)
-        print(recomendaciones)
-
-        # Pasar las recomendaciones a la plantilla swipe.html para mostrarlas en la interfaz de usuario
         return render_template('swipe.html', recomendaciones=recomendaciones)
         
     except Exception as e:
@@ -291,10 +337,29 @@ def guardar_interaccion():
                     (usuario_id, movie_id, valoracion))
         conn.commit()
         cur.close()
+
+            # Incrementar el contador de interacciones en la sesión
+        if 'contador_interacciones' not in session:
+            session['contador_interacciones'] = 0
+        session['contador_interacciones'] += 1
+
+        # Verificar si es momento de refrescar las recomendaciones
+        if session['contador_interacciones'] % 5 == 0:
+            # Resetear el contador
+            session['contador_interacciones'] = 0
+            # Lógica para refrescar las recomendaciones (explicada en el siguiente paso)
+            recomendaciones = obtener_recomendaciones_usuario_regular(session.get('usuario_id'), n=5)
+            session['recomendaciones'] = recomendaciones  # Asume que puedes almacenar las recomendaciones directamente; puede requerir ajuste
+        
         return jsonify({'success': 'Interacción del usuario guardada correctamente.'}), 200
     except psycopg2.Error as e:
         conn.rollback()
         return jsonify({'error': f'Error al guardar la interacción del usuario: {e}'}), 500
+    
+@app.route('/mostrar_recomendaciones')
+def mostrar_recomendaciones():
+    recomendaciones = session.get('recomendaciones', [])
+    return render_template('swipe.html', recomendaciones=recomendaciones)
 
 if __name__ == '__main__':
     app.run(debug=True)
