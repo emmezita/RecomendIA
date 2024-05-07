@@ -3,6 +3,20 @@
 RestAPI desarrollada en Flask para el proyecto de IA con el profesor Rolando Andrade.
 SMBD: Postgres.
 
+## Resumen del Proyecto
+
+Este proyecto implementa un sistema de recomendación de películas sofisticado y personalizado, diseñado para ofrecer a los usuarios recomendaciones altamente relevantes basadas en sus preferencias y comportamientos de visualización anteriores. Utilizando técnicas avanzadas de procesamiento de lenguaje natural (NLP) y aprendizaje automático, el sistema analiza un vasto conjunto de datos de películas para identificar y recomendar contenido que resuene con los intereses individuales de cada usuario.
+
+A través de un modelo de perfil de usuario dinámico, el sistema adapta sus recomendaciones basándose en las interacciones pasadas del usuario, incluyendo valoraciones de películas y géneros preferidos. Utilizando una matriz TF-IDF construida a partir de descripciones de películas, géneros y décadas de lanzamiento, el sistema evalúa la similitud entre el perfil del usuario y las características de las películas disponibles.La similitud coseno se emplea para identificar las películas más alineadas con los intereses del usuario, asegurando que las recomendaciones sean tanto precisas como diversas.
+
+### Tecnología y Modelado
+
+El corazón del sistema de recomendación es el uso del TF-IDF Vectorizer y la similitud coseno, técnicas fundamentales en el campo del NLP, para transformar y comparar los perfiles de usuarios y películas. Esta aproximación permite un análisis detallado del contenido textual asociado a cada película, incluyendo géneros y descripciones, para identificar patrones y similitudes con las preferencias del usuario.
+
+### ¿Por que TD-IDF y Similitud de Coseno?
+
+Al aplicar TF-IDF a las descripciones de películas, podemos cuantificar la relevancia de términos únicos, facilitando la comparación precisa entre películas y perfiles de usuario. Esta técnica transforma el texto en un espacio vectorial, destacando la importancia de términos específicos en relación a un conjunto de documentos. Al comparar vectores en el espacio TF-IDF, la similitud coseno ofrece una medida robusta de cómo de similares son dos documentos (en este caso, un perfil de usuario y una película), independientemente de su tamaño.
+
 ## Instalación
 
 Para instalar las dependencias de este proyecto, sigue estos pasos:
@@ -79,4 +93,3 @@ Se aceptan contribuciones al proyecto. Para contribuir, sigue estos pasos:
 2. Realiza los cambios necesarios.
 3. Realiza un commit de los cambios.
 4. Crea una solicitud de extracción.
-
