@@ -7,9 +7,17 @@ var allCards = document.querySelectorAll('.tinder--card');
 var nolove = document.getElementById('nolove');
 var love = document.getElementById('love');
 var ignore = document.getElementById('ignore');
-// var newCards = [];
+var genre_json = [];
 
 console.log(recomendaciones_json);
+
+window.onload = function() {
+  fetch('/genres')
+      .then(response => response.json())
+      .then(data => {
+          genre_json = data;
+      });
+};
 
 // cambiar la informacion que se muestra en el modal
 function showModal(id) {
@@ -20,11 +28,13 @@ function showModal(id) {
 
   document.querySelector('.movie-title').innerText = movie.title;
   document.querySelector('.movie-desc').innerText = movie.description;
-  // document.querySelector('.movie-desc').innerText = 'Movie Description';
-
+  //generos_pelicula es un string con los ids de los generos separados por comas
+  let generos_pelicula_id = movie.genre_id.split(",");
+  let generos_bien = generos_pelicula_id.map(genre_id => genre_json.find(genre => genre.id == genre_id).name);
+  document.querySelector('.movie-genres').innerText = `Genres: ${generos_bien.join(', ')}`;
+  document.querySelector('.movie-release').innerText = `Release Date: ${movie.age_release}`;
   dialog.showModal();
 }
-
 
 function initCards(card, index) {
   var newCards = document.querySelectorAll('.tinder--card:not(.removed)');
@@ -236,6 +246,7 @@ function nuevas_recomendaciones() {
                 allCards = document.querySelectorAll('.tinder--card:not(.removed)');
                 initCards();
                 initializeHammer();
+                recomendaciones_json = recomendaciones_json.concat(newCards);
             });
         } else {
             console.error('Error al obtener nuevas recomendaciones.');

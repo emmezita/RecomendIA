@@ -21,30 +21,6 @@ conn = psycopg2.connect(
 
 # FUNCIONES PARA EL SISTEMA DE RECOMENDACIÓN
 
-##### FUNCION PARA OBTENER PELÍCULAS VISTAS POR EL USUARIO #####
-def obtener_peliculas_vistas(usuario_id):
-    # Inicializa una lista vacía para almacenar las películas vistas
-    peliculas_vistas = []
-    try:
-        # Crea un nuevo cursor
-        cur = conn.cursor()
-        # Ejecuta una consulta SQL para obtener todas las películas vistas por el usuario
-        cur.execute("SELECT pelicula_id FROM interaccionesusuariopelicula WHERE usuario_id = %s", (usuario_id,))
-        # Obtiene todos los resultados de la consulta
-        resultados = cur.fetchall()
-        # Itera sobre cada fila en los resultados
-        for fila in resultados:
-            # Agrega el ID de la película a la lista de películas vistas
-            peliculas_vistas.append(fila[0])
-        # Cierra el cursor
-        cur.close()
-    except Exception as e:
-        # Imprime cualquier error que ocurra
-        print(f"Error al obtener películas vistas por el usuario {usuario_id}: {e}")
-
-    # Devuelve la lista de películas vistas
-    return peliculas_vistas
-
 def obtener_recomendaciones(genre_ids, year_ranges, n):
     # Convertir genre_ids y year_ranges a strings y ajustar el formato para coincidir con el entrenamiento
     genres_text = ','.join(map(str, genre_ids))  # Los géneros simplemente se unen por comas
@@ -75,56 +51,78 @@ def obtener_recomendaciones(genre_ids, year_ranges, n):
 
     return recommended_movies[:n]  # Devolver hasta n recomendaciones
 
+##### FUNCION PARA OBTENER PELÍCULAS VISTAS POR EL USUARIO #####
+def obtener_peliculas_vistas(usuario_id):
+    # Inicializa una lista vacía para almacenar las películas vistas
+    peliculas_vistas = []
+    try:
+        # Crea un nuevo cursor
+        cur = conn.cursor()
+        # Ejecuta una consulta SQL para obtener todas las películas vistas por el usuario
+        cur.execute("SELECT pelicula_id FROM interaccionesusuariopelicula WHERE usuario_id = %s", (usuario_id,))
+        # Obtiene todos los resultados de la consulta
+        resultados = cur.fetchall()
+        # Itera sobre cada fila en los resultados
+        for fila in resultados:
+            # Agrega el ID de la película a la lista de películas vistas
+            peliculas_vistas.append(fila[0])
+        # Cierra el cursor
+        cur.close()
+    except Exception as e:
+        # Imprime cualquier error que ocurra
+        print(f"Error al obtener películas vistas por el usuario {usuario_id}: {e}")
+
+    # Devuelve la lista de películas vistas
+    return peliculas_vistas
+
 def actualizar_perfil_usuario(usuario_id):
-    # Obtén todas las interacciones del usuario
     cur = conn.cursor()
     cur.execute("SELECT pelicula_id, valoracion FROM interaccionesusuariopelicula WHERE usuario_id = %s", (usuario_id,))
     interacciones = cur.fetchall()
     
+    # Inicializa el perfil del usuario con ceros
+    perfil_usuario = np.zeros(tfidf_matrix.shape[1])
     num_rows = tfidf_matrix.shape[0]
-
-    # Calcula el vector de características del usuario
-    perfil_usuario = np.zeros(tfidf_matrix.shape[1])  # Asume que tfidf_matrix es una matriz scipy sparse de tamaño (n_peliculas, n_features)
+    
     for pelicula_id, valoracion in interacciones:
-        # Ajusta los pesos según la valoración
-        peso = 1 if valoracion == 1 else -1 if valoracion == 0 else 0
-        pelicula_idx = df.index[df['movie_id'] == pelicula_id].tolist()[0]  # Asegúrate de tener una columna 'movie_id' en df
-        # Ensure pelicula_idx is not out of range
-        if pelicula_idx < num_rows:
-            perfil_usuario += peso * tfidf_matrix[pelicula_idx, :].toarray().flatten()
-        else:
-            print(f"Warning: pelicula_idx ({pelicula_idx}) is out of range. Skipping this index.")
-    
+        try:
+            pelicula_idx = df.index[df['movie_id'] == pelicula_id].tolist()[0]
+
+            print (pelicula_idx)
+            # Ajusta los pesos según la valoración
+            peso = 0.5 if valoracion == 2 else 1 if valoracion == 1 else -1
+            if pelicula_idx < num_rows:
+                perfil_usuario += peso * tfidf_matrix[pelicula_idx, :].toarray().flatten()
+            
+        except IndexError:
+            print(f"Warning: No se encontró el índice para la película con ID {pelicula_id}.")
+            continue
+
     # Normaliza el perfil del usuario
-    if np.linalg.norm(perfil_usuario) > 0:
-        perfil_usuario = perfil_usuario / np.linalg.norm(perfil_usuario)
-    
+    norma = np.linalg.norm(perfil_usuario)
+    if norma > 0:
+        perfil_usuario = perfil_usuario / norma
+
     return perfil_usuario
 
 def obtener_recomendaciones_usuario_regular(usuario_id, n):
     perfil_usuario = actualizar_perfil_usuario(usuario_id)
     
-    # Calcula la similitud coseno entre el perfil del usuario y todas las películas
     similitudes = cosine_similarity(perfil_usuario.reshape(1, -1), tfidf_matrix)
-    
-    # Selecciona las películas con mayor similitud que el usuario aún no ha visto
     peliculas_vistas = obtener_peliculas_vistas(usuario_id)
     recomendaciones_indices = np.argsort(similitudes.flatten())[::-1]
-
+    
     recommended_movies = []
     for idx in recomendaciones_indices:
-        if idx < len(df):
-            if df.iloc[idx]['movie_id'] not in peliculas_vistas:
-                movie = df.iloc[idx]
-                recommended_movies.append({'movie_id': movie['movie_id'], 'title': movie['title'], 'genre_id': movie['genre_id'], 'age_release': movie['age_release'], 'image_url': movie['image_url'], 'description': movie['description']})
+        if len(recommended_movies) >= n:
+            break
+        pelicula_id = df.iloc[idx]['movie_id']
+        if pelicula_id not in peliculas_vistas:
+            movie = df.iloc[idx].to_dict()
+            movie['movie_id'] = int(movie['movie_id'])  # Asegura que el ID de la película sea un entero
+            recommended_movies.append(movie)
     
-    # Convierte cualquier valor numpy.int64 en int
-    for movie in recommended_movies:
-        for key, value in movie.items():
-            if isinstance(value, np.int64):
-                movie[key] = int(value)
-
-    return recommended_movies[:n]
+    return recommended_movies
 
 
 def cargar_datos():
@@ -136,6 +134,7 @@ movies_df = cargar_datos()
 
 # Eliminar filas con valores np.nan en las columnas 'genre_id' y 'age_release'
 df = movies_df.dropna(subset=['genre_id', 'age_release', 'description'])
+df = df.reset_index(drop=True)
 
 # Concatenar columnas 'genre_id' y 'age_release' para obtener un texto combinado
 df['combined_text'] = df.apply(lambda x: f"{x['genre_id']} {str(x['age_release'])[:3]}0s {x['description']}", axis=1)
@@ -143,6 +142,8 @@ df['combined_text'] = df.apply(lambda x: f"{x['genre_id']} {str(x['age_release']
 # Crear un TfidfVectorizer
 tfidf_vectorizer = TfidfVectorizer(lowercase=True, stop_words='english')
 tfidf_matrix = tfidf_vectorizer.fit_transform(df['combined_text'])
+
+print(tfidf_matrix)
 
 
 # RUTAS DE LA APLICACION WEB PARA LA RECOMENDACIÓN DE PELÍCULAS
