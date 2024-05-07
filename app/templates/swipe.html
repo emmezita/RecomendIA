@@ -16,7 +16,7 @@
       <div class="navbar__item navbar__item--left">
       <img class="logo" src="{{ url_for('static', filename='images/logo.svg') }}" alt="Your Company">        </div>
       <div class="navbar__item navbar__item--center">
-        <button class="sugiereme-button">
+        <a href="{{ url_for('suggest') }}" class="sugiereme-button">
           <div class="circular-icon">
             <i class="fa fa-magnifying-glass" ></i>
           </div>
@@ -26,7 +26,7 @@
           <div class="circular-icon" style="visibility: hidden; margin-left: 0px;">
             <i class="fa fa-magnifying-glass" ></i>
           </div>
-        </button>
+        </a>
       </div>
       <div>
         <a href="{{ url_for('login') }}" style="font-size: 24px;" class="me-3">

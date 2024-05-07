@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sugiereme</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='src/main.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/suggest.css')}}">
+    <script src="https://kit.fontawesome.com/0109ddc3c5.js" crossorigin="anonymous"></script>
+    <script src="https://hammerjs.github.io/dist/hammer.min.js"></script>
+
+</head>
+<body>
+    <div class="navbar">
+      <div class="navbar__item navbar__item--left">
+        <img class="logo" src="{{ url_for('static', filename='images/logo.svg') }}" alt="Your Company">
+        <a href="{{ url_for('swipe') }}" style="font-size: 18px; color:white; margin-left:20px;" class="me-3">
+          Volver
+          <i class="fa fa-hand-o-left" style="color: white;"></i>
+        </a>        
+      </div>
+      <div class="navbar__item navbar__item--center" style="color: white; font-weight: bold; font-size: 20px;">
+        <div>
+          
+        </div>
+      </div>
+      <div>
+        <a href="{{ url_for('login') }}" style="font-size: 24px;" class="me-3">
+          <i class="fa fa-sign-out" style="color: white;"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="cartelera-container">
+        <div class="fila">
+            {% for recomendacion in recomendaciones[:5] %}
+            <div class="cartelera--item" style="position: relative;">
+                <button class="info-button" onclick="showModal({{ recomendacion.movie_id }})">
+                    <i class="fas fa-info-circle"></i>
+                </button>
+                <div class="cartelera--item-image">
+                    <img class="object-cover" src="https://image.tmdb.org/t/p/w500{{ recomendacion.image_url }}" alt="{{ recomendacion.title }}">
+                </div>
+                <dialog id="info_modal" class="modal">
+                    <div class="modal-box">
+                      <h3 class="font-bold text-lg movie-title"></h3>
+                      <p class="py-4 movie-desc"></p>
+                      <hr>
+                      <p class="py-4 movie-genres"></p>
+                      <i class="py-4 movie-release"></i>
+                      <div class="modal-action">
+                        <form method="dialog">
+                          <button class="btn">Cerrar</button>
+                        </form>
+                      </div>
+                    </div>
+                  </dialog>
+            </div>        
+            {% endfor %}
+        </div>
+        <div class="fila" style="margin-top: 120px;">
+            {% for recomendacion in recomendaciones[5:] %}
+            <div class="cartelera--item" style="position: relative;">
+                <button class="info-button" onclick="showModal({{ recomendacion.movie_id }})">
+                    <i class="fas fa-info-circle"></i>
+                </button>
+                <div class="cartelera--item-image">
+                    <img class="object-cover" src="https://image.tmdb.org/t/p/w500{{ recomendacion.image_url }}" alt="{{ recomendacion.title }}">
+                </div>
+                <dialog id="info_modal" class="modal">
+                    <div class="modal-box">
+                      <h3 class="font-bold text-lg movie-title"></h3>
+                      <p class="py-4 movie-desc"></p>
+                      <hr>
+                      <p class="py-4 movie-genres"></p>
+                      <i class="py-4 movie-release"></i>
+                      <div class="modal-action">
+                        <form method="dialog">
+                          <button class="btn">Cerrar</button>
+                        </form>
+                      </div>
+                    </div>
+                  </dialog>
+            </div>        
+            {% endfor %}
+        </div>
+      </div>
+  
+    <script>
+      let recomendaciones_json = {{ recomendaciones | tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='js/hammer.min.js') }}"></script>
+    <script src="{{url_for('static', filename='js/suggest.js')}}"></script>
+
+
+</body>
+</html>

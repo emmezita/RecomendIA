@@ -1,4 +1,3 @@
-from cgi import print_arguments
 from flask import Flask, redirect, url_for, render_template, request, jsonify, session
 import psycopg2
 import os
@@ -339,6 +338,49 @@ def guardar_interaccion():
 def mostrar_recomendaciones():
     recomendaciones = obtener_recomendaciones_usuario_regular(session.get('usuario_id'), n=5)
     return jsonify(recomendaciones)
+
+
+@app.route('/suggest', methods=['GET'])
+def suggest():
+    usuario_id = session.get('usuario_id')
+    if usuario_id is None:
+        return "Error: No se pudo obtener el ID del usuario"
+
+    try:
+        # Verificar si el usuario es nuevo o regular
+        cur = conn.cursor()
+        cur.execute("SELECT 1 FROM interaccionesusuariopelicula WHERE usuario_id = %s LIMIT 1", (usuario_id,))
+        result = cur.fetchone()
+
+        # Si 'result' es None, entonces 'count_interacciones' será 0, de lo contrario será 1
+        count_interacciones = 0 if result is None else 1
+
+        print(f"Contador de interacciones: {count_interacciones}")
+        
+        if count_interacciones == 0:
+            # Usuario nuevo: Obtener preferencias y generar recomendaciones iniciales
+            cur.execute("SELECT DISTINCT genero, ano_inicio, ano_fin FROM PreferenciasUsuario WHERE usuario_id = %s", (usuario_id,))    
+            preferencias = cur.fetchall()
+
+            if preferencias:
+                generos = list(set([preferencia[0] for preferencia in preferencias]))
+                epocas = list(set([(preferencia[1], preferencia[2]) for preferencia in preferencias]))
+                print (generos, epocas)
+                recomendaciones = obtener_recomendaciones(generos, epocas, 10)
+                print (recomendaciones)
+            else:
+                print(f"No se encontraron preferencias para el usuario con ID {usuario_id}")
+                recomendaciones = []
+        else:
+            # Usuario regular: Generar recomendaciones basadas en interacciones previas
+            recomendaciones = obtener_recomendaciones_usuario_regular(usuario_id, 10)
+            print(recomendaciones)
+        
+        cur.close()
+        return render_template('suggest.html', recomendaciones=recomendaciones)
+        
+    except Exception as e:
+        return f"Error al obtener las recomendaciones: {e}"
 
 if __name__ == '__main__':
     app.run(debug=True)
