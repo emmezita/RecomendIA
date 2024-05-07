@@ -44,8 +44,8 @@
 
         <div class="tinder--cards">
           {% for recomendacion in recomendaciones %}
-          <div class="tinder--card" data-movieId="{{ recomendacion.movie_id }}">
-            <button class="info-button" onclick="showModal({{ recomendacion.id }})">
+          <div class="tinder--card" data-movieid="{{ recomendacion.movie_id }}">
+            <button class="info-button" onclick="showModal({{ recomendacion.movie_id }})">
               <i class="fas fa-info-circle"></i>
             </button>
             <!-- <p>{{ recomendacion.description }}</p> -->
@@ -63,8 +63,6 @@
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/hammer.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/swipe.js') }}"></script>
     <dialog id="info_modal" class="modal">
       <div class="modal-box">
         <h3 class="font-bold text-lg movie-title"></h3>
@@ -77,27 +75,11 @@
       </div>
     </dialog>
 
-    <script src="{{url_for('static', filename='js/swipe.js')}}"></script>
-
     <script>
-
       let recomendaciones_json = {{ recomendaciones | tojson }};
-      console.log(recomendaciones_json);
-
-      // cambiar la informacion que se muestra en el modal
-      function showModal(id) {
-        console.log(id);
-        var dialog = document.getElementById('info_modal');
-
-        // buscar la informacion de la pelicula dentro del json de recomendaciones
-
-        document.querySelector('.movie-title').innerText = 'Movie Title';
-        document.querySelector('.movie-desc').innerText = 'Movie Description';
-
-        dialog.showModal();
-      }
-
     </script>
+    <script src="{{ url_for('static', filename='js/hammer.min.js') }}"></script>
+    <script src="{{url_for('static', filename='js/swipe.js')}}"></script>
 
 
 </body>

@@ -1,3 +1,4 @@
+from cgi import print_arguments
 from flask import Flask, redirect, url_for, render_template, request, jsonify, session
 import psycopg2
 import os
@@ -64,7 +65,7 @@ def obtener_recomendaciones(genre_ids, year_ranges, n):
     for idx in similar_indices:
         if idx < len(df):  # Asegurar que el índice esté dentro del rango del DataFrame original
             movie = df.iloc[idx]
-            recommended_movies.append({'movie_id': movie['movie_id'], 'title': movie['title'], 'genre_id': movie['genre_id'], 'age_release': movie['age_release'], 'image_url': movie['image_url']})
+            recommended_movies.append({'movie_id': movie['movie_id'], 'title': movie['title'], 'genre_id': movie['genre_id'], 'age_release': movie['age_release'], 'image_url': movie['image_url'], 'description': movie['description']})
     
     # Convierte cualquier valor numpy.int64 en int
     for movie in recommended_movies:
@@ -80,13 +81,19 @@ def actualizar_perfil_usuario(usuario_id):
     cur.execute("SELECT pelicula_id, valoracion FROM interaccionesusuariopelicula WHERE usuario_id = %s", (usuario_id,))
     interacciones = cur.fetchall()
     
+    num_rows = tfidf_matrix.shape[0]
+
     # Calcula el vector de características del usuario
     perfil_usuario = np.zeros(tfidf_matrix.shape[1])  # Asume que tfidf_matrix es una matriz scipy sparse de tamaño (n_peliculas, n_features)
     for pelicula_id, valoracion in interacciones:
         # Ajusta los pesos según la valoración
         peso = 1 if valoracion == 1 else -1 if valoracion == 0 else 0
         pelicula_idx = df.index[df['movie_id'] == pelicula_id].tolist()[0]  # Asegúrate de tener una columna 'movie_id' en df
-        perfil_usuario += peso * tfidf_matrix[pelicula_idx, :].toarray().flatten()
+        # Ensure pelicula_idx is not out of range
+        if pelicula_idx < num_rows:
+            perfil_usuario += peso * tfidf_matrix[pelicula_idx, :].toarray().flatten()
+        else:
+            print(f"Warning: pelicula_idx ({pelicula_idx}) is out of range. Skipping this index.")
     
     # Normaliza el perfil del usuario
     if np.linalg.norm(perfil_usuario) > 0:
@@ -103,15 +110,22 @@ def obtener_recomendaciones_usuario_regular(usuario_id, n):
     # Selecciona las películas con mayor similitud que el usuario aún no ha visto
     peliculas_vistas = obtener_peliculas_vistas(usuario_id)
     recomendaciones_indices = np.argsort(similitudes.flatten())[::-1]
-    
-    recomendaciones = []
+
+    recommended_movies = []
     for idx in recomendaciones_indices:
-        if df.iloc[idx]['movie_id'] not in peliculas_vistas:
-            recomendaciones.append(df.iloc[idx])
-            if len(recomendaciones) >= n:
-                break
+        if idx < len(df):
+            if df.iloc[idx]['movie_id'] not in peliculas_vistas:
+                movie = df.iloc[idx]
+                recommended_movies.append({'movie_id': movie['movie_id'], 'title': movie['title'], 'genre_id': movie['genre_id'], 'age_release': movie['age_release'], 'image_url': movie['image_url'], 'description': movie['description']})
     
-    return recomendaciones
+    # Convierte cualquier valor numpy.int64 en int
+    for movie in recommended_movies:
+        for key, value in movie.items():
+            if isinstance(value, np.int64):
+                movie[key] = int(value)
+
+    return recommended_movies[:n]
+
 
 def cargar_datos():
     movies_df = pd.read_csv("app/static/movies-dataset.csv")
@@ -268,47 +282,13 @@ def swipe():
         else:
             # Usuario regular: Generar recomendaciones basadas en interacciones previas
             recomendaciones = obtener_recomendaciones_usuario_regular(usuario_id, 5)
+            print(recomendaciones)
         
         cur.close()
         return render_template('swipe.html', recomendaciones=recomendaciones)
         
     except Exception as e:
         return f"Error al obtener las recomendaciones: {e}"
-    
-# FUNCIONES DE LA API
-
-# # Función para acceder a la API de TMDb y obtener películas populares
-# @app.route('/obtener_peliculas')
-# def obtener_peliculas():
-#     url = "https://api.themoviedb.org/3/discover/movie"
-#     headers = {
-#         "accept": "application/json",
-#         "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzZDk4MTNmN2QyMDlmZjhkZmZlODFhYWY4ZmRkNTY1YiIsInN1YiI6IjY2MzZhOGI3ZTkyZDgzMDEyNGQzM2NmMCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.3jTtHSc5yMrEhPzP2MU-7mxI72TFrUqxG3ZmPgbOLbc"
-#     }
-#     params = {
-#         "api_key": "3d9813f7d209ff8dffe81aaf8fdd565b"
-#     }
-#     all_movies = []
-
-#     response = requests.get(url, headers=headers, params=params)
-
-#     if response.status_code == 200:
-#         data = response.json()
-#         # Iterar sobre cada película en los resultados
-#         for movie in data['results']:
-#             # Crear un diccionario con los campos que deseas
-#             movie_info = {
-#                 'title': movie['title'],
-#                 'genres': [genre_id for genre_id in movie['genre_ids']],
-#                 'release_year': movie['release_date'][:4],
-#                 'overview': movie['overview'],
-#                 'poster_path': movie['poster_path']
-#             }
-#             all_movies.append(movie_info)
-
-#         return jsonify(all_movies)
-#     else:
-#         return jsonify({'error': 'No se pudieron obtener las películas'}), response.status_code
 
 @app.route('/genres', methods=['GET'])
 def get_genres():
@@ -344,28 +324,20 @@ def guardar_interaccion():
         conn.commit()
         cur.close()
 
-            # Incrementar el contador de interacciones en la sesión
+        # Incrementar el contador de interacciones en la sesión
         if 'contador_interacciones' not in session:
             session['contador_interacciones'] = 0
         session['contador_interacciones'] += 1
-
-        # Verificar si es momento de refrescar las recomendaciones
-        if session['contador_interacciones'] % 5 == 0:
-            # Resetear el contador
-            session['contador_interacciones'] = 0
-            # Lógica para refrescar las recomendaciones (explicada en el siguiente paso)
-            recomendaciones = obtener_recomendaciones_usuario_regular(session.get('usuario_id'), n=5)
-            session['recomendaciones'] = recomendaciones  # Asume que puedes almacenar las recomendaciones directamente; puede requerir ajuste
         
         return jsonify({'success': 'Interacción del usuario guardada correctamente.'}), 200
     except psycopg2.Error as e:
         conn.rollback()
         return jsonify({'error': f'Error al guardar la interacción del usuario: {e}'}), 500
     
-@app.route('/mostrar_recomendaciones')
+@app.route('/mostrar_recomendaciones', methods=['GET'])
 def mostrar_recomendaciones():
-    recomendaciones = session.get('recomendaciones', [])
-    return render_template('swipe.html', recomendaciones=recomendaciones)
+    recomendaciones = obtener_recomendaciones_usuario_regular(session.get('usuario_id'), n=5)
+    return jsonify(recomendaciones)
 
 if __name__ == '__main__':
     app.run(debug=True)
