@@ -75,25 +75,32 @@ def obtener_peliculas_vistas(usuario_id):
     return peliculas_vistas
 
 def actualizar_perfil_usuario(usuario_id):
+    # Crea un cursor para interactuar con la base de datos
     cur = conn.cursor()
+    # Ejecuta una consulta SQL para obtener las interacciones del usuario con las películas
     cur.execute("SELECT pelicula_id, valoracion FROM interaccionesusuariopelicula WHERE usuario_id = %s", (usuario_id,))
+    # Obtiene todas las filas de la consulta
     interacciones = cur.fetchall()
     
     # Inicializa el perfil del usuario con ceros
     perfil_usuario = np.zeros(tfidf_matrix.shape[1])
+    # Obtiene el número de filas en la matriz TF-IDF
     num_rows = tfidf_matrix.shape[0]
     
+    # Itera sobre las interacciones del usuario
     for pelicula_id, valoracion in interacciones:
         try:
+            # Encuentra el índice de la película en el DataFrame
             pelicula_idx = df.index[df['movie_id'] == pelicula_id].tolist()[0]
 
-            print (pelicula_idx)
-            # Ajusta los pesos según la valoración
+            # Ajusta los pesos según la valoración del usuario
             peso = 0.5 if valoracion == 2 else 1 if valoracion == 1 else -1
+            # Si el índice de la película es válido, actualiza el perfil del usuario
             if pelicula_idx < num_rows:
                 perfil_usuario += peso * tfidf_matrix[pelicula_idx, :].toarray().flatten()
             
         except IndexError:
+            # Imprime una advertencia si no se encuentra el índice de la película
             print(f"Warning: No se encontró el índice para la película con ID {pelicula_id}.")
             continue
 
@@ -102,25 +109,37 @@ def actualizar_perfil_usuario(usuario_id):
     if norma > 0:
         perfil_usuario = perfil_usuario / norma
 
+    # Devuelve el perfil del usuario
     return perfil_usuario
 
 def obtener_recomendaciones_usuario_regular(usuario_id, n):
+    # Actualiza el perfil del usuario basado en sus interacciones con las películas
     perfil_usuario = actualizar_perfil_usuario(usuario_id)
     
+    # Calcula la similitud del coseno entre el perfil del usuario y todas las películas
     similitudes = cosine_similarity(perfil_usuario.reshape(1, -1), tfidf_matrix)
+    # Obtiene una lista de las películas que el usuario ya ha visto
     peliculas_vistas = obtener_peliculas_vistas(usuario_id)
+    # Ordena las películas por su similitud con el perfil del usuario, en orden descendente
     recomendaciones_indices = np.argsort(similitudes.flatten())[::-1]
     
     recommended_movies = []
+    # Itera sobre los índices de las películas recomendadas
     for idx in recomendaciones_indices:
+        # Si ya hemos encontrado suficientes recomendaciones, termina el bucle
         if len(recommended_movies) >= n:
             break
+        # Obtiene el ID de la película en el índice actual
         pelicula_id = df.iloc[idx]['movie_id']
+        # Si el usuario no ha visto esta película, la añade a las recomendaciones
         if pelicula_id not in peliculas_vistas:
+            # Convierte la fila del DataFrame en un diccionario y asegura que el ID de la película sea un entero
             movie = df.iloc[idx].to_dict()
-            movie['movie_id'] = int(movie['movie_id'])  # Asegura que el ID de la película sea un entero
+            movie['movie_id'] = int(movie['movie_id'])
+            # Añade la película a la lista de recomendaciones
             recommended_movies.append(movie)
     
+    # Devuelve las recomendaciones
     return recommended_movies
 
 
